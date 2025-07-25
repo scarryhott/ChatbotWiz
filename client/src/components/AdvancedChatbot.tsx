@@ -85,6 +85,9 @@ export default function AdvancedChatbot({ chatbot, onLeadUpdate }: AdvancedChatb
   const [lastMessageTime, setLastMessageTime] = useState(0);
   const messageDebounceMs = 1000;
   
+  // Generate unique message IDs
+  const generateMessageId = () => `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
 
@@ -201,7 +204,7 @@ export default function AdvancedChatbot({ chatbot, onLeadUpdate }: AdvancedChatb
     if (conversationStarted) return;
     
     const welcomeMessage: ConversationMessage = {
-      id: Date.now().toString(),
+      id: generateMessageId(),
       type: "bot",
       content: `👋 Hi! I'm here to help you learn about ${businessInfo.name} and understand your service needs. I'll ask you a few questions to see how we can help.`,
       timestamp: new Date().toISOString(),
@@ -226,7 +229,7 @@ export default function AdvancedChatbot({ chatbot, onLeadUpdate }: AdvancedChatb
     
     // Add topic info message
     const topicInfoMessage: ConversationMessage = {
-      id: Date.now().toString(),
+      id: generateMessageId(),
       type: "bot",
       content: topic.info,
       timestamp: new Date().toISOString(),
@@ -238,7 +241,7 @@ export default function AdvancedChatbot({ chatbot, onLeadUpdate }: AdvancedChatb
     // Ask if they have questions about this topic
     setTimeout(() => {
       const questionMessage: ConversationMessage = {
-        id: (Date.now() + 1).toString(),
+        id: generateMessageId(),
         type: "bot",
         content: `Any questions about ${topic.title.toLowerCase()}?`,
         timestamp: new Date().toISOString(),
@@ -267,7 +270,7 @@ export default function AdvancedChatbot({ chatbot, onLeadUpdate }: AdvancedChatb
       
       if (response.message) {
         const botMessage: ConversationMessage = {
-          id: Date.now().toString(),
+          id: generateMessageId(),
           type: "bot",
           content: response.message,
           timestamp: new Date().toISOString(),
@@ -282,7 +285,7 @@ export default function AdvancedChatbot({ chatbot, onLeadUpdate }: AdvancedChatb
       setIsTyping(false);
       
       const errorMessage: ConversationMessage = {
-        id: Date.now().toString(),
+        id: generateMessageId(),
         type: "bot",
         content: "I'm sorry, I'm having trouble processing your message. Please try again.",
         timestamp: new Date().toISOString(),
@@ -313,7 +316,7 @@ export default function AdvancedChatbot({ chatbot, onLeadUpdate }: AdvancedChatb
     
     // Add user message
     const userMessage: ConversationMessage = {
-      id: Date.now().toString(),
+      id: generateMessageId(),
       type: "user",
       content: message,
       timestamp: new Date().toISOString(),
@@ -362,7 +365,7 @@ export default function AdvancedChatbot({ chatbot, onLeadUpdate }: AdvancedChatb
     } else {
       setIsTyping(false);
       const botMessage: ConversationMessage = {
-        id: Date.now().toString(),
+        id: generateMessageId(),
         type: "bot",
         content: "Let me ask you about our services step by step.",
         timestamp: new Date().toISOString(),
@@ -383,7 +386,7 @@ export default function AdvancedChatbot({ chatbot, onLeadUpdate }: AdvancedChatb
     
     if (hasQuestions) {
       const botMessage: ConversationMessage = {
-        id: Date.now().toString(),
+        id: generateMessageId(),
         type: "bot",
         content: "What would you like to know?",
         timestamp: new Date().toISOString(),
@@ -411,7 +414,7 @@ export default function AdvancedChatbot({ chatbot, onLeadUpdate }: AdvancedChatb
       // Ask if they have more questions
       setTimeout(() => {
         const botMessage: ConversationMessage = {
-          id: Date.now().toString(),
+          id: generateMessageId(),
           type: "bot",
           content: "Any other questions about this topic?",
           timestamp: new Date().toISOString(),
@@ -424,7 +427,7 @@ export default function AdvancedChatbot({ chatbot, onLeadUpdate }: AdvancedChatb
     } catch (error) {
       setIsTyping(false);
       const botMessage: ConversationMessage = {
-        id: Date.now().toString(),
+        id: generateMessageId(),
         type: "bot",
         content: "Great question! Our team can provide detailed information about that.",
         timestamp: new Date().toISOString(),
@@ -441,7 +444,7 @@ export default function AdvancedChatbot({ chatbot, onLeadUpdate }: AdvancedChatb
     setIsTyping(false);
     
     const questionMessage: ConversationMessage = {
-      id: Date.now().toString(),
+      id: generateMessageId(),
       type: "bot",
       content: currentTopic.question,
       timestamp: new Date().toISOString(),
@@ -505,7 +508,7 @@ export default function AdvancedChatbot({ chatbot, onLeadUpdate }: AdvancedChatb
     
     setIsTyping(false);
     const confirmMessage: ConversationMessage = {
-      id: Date.now().toString(),
+      id: generateMessageId(),
       type: "bot",
       content: "Perfect! Let me ask about the next aspect.",
       timestamp: new Date().toISOString(),
@@ -547,7 +550,7 @@ export default function AdvancedChatbot({ chatbot, onLeadUpdate }: AdvancedChatb
     }
     
     const completionMessage: ConversationMessage = {
-      id: Date.now().toString(),
+      id: generateMessageId(),
       type: "bot",
       content: `Perfect! I have all the information I need. One of our ${businessInfo.name} experts will be in touch shortly to discuss your needs.`,
       timestamp: new Date().toISOString(),
@@ -572,7 +575,7 @@ export default function AdvancedChatbot({ chatbot, onLeadUpdate }: AdvancedChatb
         });
       } catch (error) {
         const helpMessage: ConversationMessage = {
-          id: Date.now().toString(),
+          id: generateMessageId(),
           type: "bot",
           content: "I'd be happy to help! Our team can provide detailed information.",
           timestamp: new Date().toISOString(),
@@ -582,7 +585,7 @@ export default function AdvancedChatbot({ chatbot, onLeadUpdate }: AdvancedChatb
       }
     } else {
       const thankYouMessage: ConversationMessage = {
-        id: Date.now().toString(),
+        id: generateMessageId(),
         type: "bot",
         content: `Thank you! We look forward to helping you with your ${businessInfo.services}. Have a great day!`,
         timestamp: new Date().toISOString(),

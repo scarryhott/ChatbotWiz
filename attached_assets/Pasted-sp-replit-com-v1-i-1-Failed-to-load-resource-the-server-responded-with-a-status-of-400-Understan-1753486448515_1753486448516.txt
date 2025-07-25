@@ -1,0 +1,81 @@
+sp.replit.com/v1/i:1  Failed to load resource: the server responded with a status of 400 ()Understand this error
+sp.replit.com/v1/i:1  Failed to load resource: the server responded with a status of 400 ()Understand this error
+/stripe-checkout-success?sessionId=cs_live_a1CCm9esVgC2l99urK7DQXDNI5Pzpj82W1aHvEoTxQz5Rfl5962q4aJw9N&planPeriod=monthly:1 Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner.
+sp.replit.com/v1/i:1  Failed to load resource: the server responded with a status of 400 ()Understand this error
+15Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.Understand this error
+framework-de6c5a121a1c53f0.js:1 Unrecognized feature: 'ambient-light-sensor'.
+_ @ framework-de6c5a121a1c53f0.js:1Understand this warning
+framework-de6c5a121a1c53f0.js:1 Unrecognized feature: 'battery'.
+_ @ framework-de6c5a121a1c53f0.js:1Understand this warning
+framework-de6c5a121a1c53f0.js:1 Unrecognized feature: 'execution-while-not-rendered'.
+_ @ framework-de6c5a121a1c53f0.js:1Understand this warning
+framework-de6c5a121a1c53f0.js:1 Unrecognized feature: 'execution-while-out-of-viewport'.
+_ @ framework-de6c5a121a1c53f0.js:1Understand this warning
+framework-de6c5a121a1c53f0.js:1 Unrecognized feature: 'layout-animations'.
+_ @ framework-de6c5a121a1c53f0.js:1Understand this warning
+framework-de6c5a121a1c53f0.js:1 Unrecognized feature: 'legacy-image-formats'.
+_ @ framework-de6c5a121a1c53f0.js:1Understand this warning
+framework-de6c5a121a1c53f0.js:1 Unrecognized feature: 'navigation-override'.
+_ @ framework-de6c5a121a1c53f0.js:1Understand this warning
+framework-de6c5a121a1c53f0.js:1 Unrecognized feature: 'oversized-images'.
+_ @ framework-de6c5a121a1c53f0.js:1Understand this warning
+framework-de6c5a121a1c53f0.js:1 Unrecognized feature: 'publickey-credentials'.
+_ @ framework-de6c5a121a1c53f0.js:1Understand this warning
+framework-de6c5a121a1c53f0.js:1 Unrecognized feature: 'speaker-selection'.
+_ @ framework-de6c5a121a1c53f0.js:1Understand this warning
+framework-de6c5a121a1c53f0.js:1 Unrecognized feature: 'unoptimized-images'.
+_ @ framework-de6c5a121a1c53f0.js:1Understand this warning
+framework-de6c5a121a1c53f0.js:1 Unrecognized feature: 'unsized-media'.
+_ @ framework-de6c5a121a1c53f0.js:1Understand this warning
+framework-de6c5a121a1c53f0.js:1 Unrecognized feature: 'pointer-lock'.
+_ @ framework-de6c5a121a1c53f0.js:1Understand this warning
+framework-de6c5a121a1c53f0.js:1 Allow attribute will take precedence over 'allowfullscreen'.
+_ @ framework-de6c5a121a1c53f0.js:1Understand this warning
+framework-de6c5a121a1c53f0.js:1 Allow attribute will take precedence over 'allowpaymentrequest'.
+_ @ framework-de6c5a121a1c53f0.js:1Understand this warning
+5564-d69963a680bebfc4.js:1 WebSocket is already in CLOSING or CLOSED state.
+send @ 5564-d69963a680bebfc4.js:1Understand this error
+www.google-analytics.com/collect?v=1&_v=j101&aip=1&a=813985652&t=event&ni=0&_s=30&dl=https%3A%2F%2Freplit.com%2Fstripe-checkout-success%3FsessionId%3Dcs_live_a1CCm9esVgC2l99urK7DQXDNI5Pzpj82W1aHvEoTxQz5Rfl5962q4aJw9N%26planPeriod%3Dmonthly&dr=https%3A%2F%2Fcheckout.stripe.com%2F&dp=%2F%40HarryScott6%2FChatbotWiz&ul=en-us&de=UTF-8&dt=replEnvironmentDesktop&sd=30-bit&sr=1470x956&vp=1470x832&je=0&ec=All&ea=Agent%20Used&ev=0&_u=SCCAgEAjQAAAgGgCIAD~&jid=&gjid=&cid=513652516.1751242955&tid=UA-25629695-1&_gid=1794267104.1753479646&z=1423190749:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVEDUnderstand this error
+www.google-analytics.com/collect?v=1&_v=j101&aip=1&a=813985652&t=event&ni=0&_s=31&dl=https%3A%2F%2Freplit.com%2Fstripe-checkout-success%3FsessionId%3Dcs_live_a1CCm9esVgC2l99urK7DQXDNI5Pzpj82W1aHvEoTxQz5Rfl5962q4aJw9N%26planPeriod%3Dmonthly&dr=https%3A%2F%2Fcheckout.stripe.com%2F&dp=%2F%40HarryScott6%2FChatbotWiz&ul=en-us&de=UTF-8&dt=replEnvironmentDesktop&sd=30-bit&sr=1470x956&vp=1470x832&je=0&ec=All&ea=Agent%20Used&ev=0&_u=SCCAgEAjQAAAgGgCIAD~&jid=&gjid=&cid=513652516.1751242955&tid=UA-25629695-1&_gid=1794267104.1753479646&z=55689542:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVEDUnderstand this error
+analytics.google.com/g/collect?v=2&tid=G-MPJY3F1YEL&gtm=45je57n0v9135634466za200&_p=1753484176993&gcd=13l3l3l3l2l1&npa=0&dma=0&tag_exp=101509157~103116026~103200004~103233427~104684208~104684211~104948813~105091133~105134979~105134981&ul=en-us&sr=1470x956&cid=513652516.1751242955&ecid=1829434834&uaa=arm&uab=64&uafvl=Not)A%253BBrand%3B8.0.0.0%7CChromium%3B138.0.7204.158%7CGoogle%2520Chrome%3B138.0.7204.158&uamb=0&uam=&uap=macOS&uapv=14.5.0&uaw=0&are=1&frm=0&pscdl=noapi&_eu=ABAIAAQ&dl=https%3A%2F%2Freplit.com%2Fstripe-checkout-success%3FsessionId%3Dcs_live_a1CCm9esVgC2l99urK7DQXDNI5Pzpj82W1aHvEoTxQz5Rfl5962q4aJw9N%26planPeriod%3Dmonthly&dr=https%3A%2F%2Fcheckout.stripe.com%2F&dp=%2F%40HarryScott6%2FChatbotWiz&dt=replEnvironmentDesktop&sid=1753483433&sct=5&seg=1&_tu=wAQ&_s=23&tfd=338300:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVEDUnderstand this error
+r.stripe.com/b:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVEDUnderstand this error
+r.stripe.com/b:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVEDUnderstand this error
+_app-87be92312529845e.js:18 onClick is deprecated, please use onPress
+(anonymous) @ _app-87be92312529845e.js:18Understand this warning
+sp.replit.com/v1/i:1  Failed to load resource: the server responded with a status of 400 ()Understand this error
+15_app-87be92312529845e.js:18 If you do not provide children, you must specify an aria-label for accessibility
+(anonymous) @ _app-87be92312529845e.js:18Understand this warning
+www.google-analytics.com/collect?v=1&_v=j101&aip=1&a=813985652&t=pageview&_s=67&dl=https%3A%2F%2Freplit.com%2Fstripe-checkout-success%3FsessionId%3Dcs_live_a1CCm9esVgC2l99urK7DQXDNI5Pzpj82W1aHvEoTxQz5Rfl5962q4aJw9N%26planPeriod%3Dmonthly&dr=https%3A%2F%2Fcheckout.stripe.com%2F&dp=%2F%40HarryScott6%2FChatbotWiz&ul=en-us&de=UTF-8&dt=replEnvironmentDesktop&sd=30-bit&sr=1470x956&vp=1470x832&je=0&_u=SCCAgEAjQAAAgGgCIAD~&jid=569532580&gjid=778823740&cid=513652516.1751242955&tid=UA-25629695-1&_gid=1794267104.1753479646&z=69099044:1  Failed to load resource: net::ERR_CONNECTION_CLOSEDUnderstand this error
+www.google-analytics.com/collect?v=1&_v=j101&aip=1&a=813985652&t=event&ni=1&_s=68&dl=https%3A%2F%2Freplit.com%2Fstripe-checkout-success%3FsessionId%3Dcs_live_a1CCm9esVgC2l99urK7DQXDNI5Pzpj82W1aHvEoTxQz5Rfl5962q4aJw9N%26planPeriod%3Dmonthly&dr=https%3A%2F%2Fcheckout.stripe.com%2F&dp=%2F%40HarryScott6%2FChatbotWiz&ul=en-us&de=UTF-8&dt=replEnvironmentDesktop&sd=30-bit&sr=1470x956&vp=1470x832&je=0&ec=All&ea=Viewed%20replEnvironmentDesktop%20Page&ev=0&_u=SCCAgEAjQAAAgGgCIAD~&jid=&gjid=&cid=513652516.1751242955&tid=UA-25629695-1&_gid=1794267104.1753479646&z=115842291:1  Failed to load resource: net::ERR_CONNECTION_CLOSEDUnderstand this error
+sp.replit.com/v1/i:1  Failed to load resource: the server responded with a status of 400 ()Understand this error
+_app-87be92312529845e.js:18 task queue exceeded allotted deadline by 28ms
+(anonymous) @ _app-87be92312529845e.js:18Understand this warning
+workspace_iframe.html:32 Unrecognized feature: 'ambient-light-sensor'.Understand this warning
+workspace_iframe.html:32 Unrecognized feature: 'battery'.Understand this warning
+workspace_iframe.html:32 Unrecognized feature: 'execution-while-not-rendered'.Understand this warning
+workspace_iframe.html:32 Unrecognized feature: 'execution-while-out-of-viewport'.Understand this warning
+workspace_iframe.html:32 Unrecognized feature: 'layout-animations'.Understand this warning
+workspace_iframe.html:32 Unrecognized feature: 'legacy-image-formats'.Understand this warning
+workspace_iframe.html:32 Unrecognized feature: 'navigation-override'.Understand this warning
+workspace_iframe.html:32 Unrecognized feature: 'oversized-images'.Understand this warning
+workspace_iframe.html:32 Unrecognized feature: 'publickey-credentials'.Understand this warning
+workspace_iframe.html:32 Unrecognized feature: 'speaker-selection'.Understand this warning
+workspace_iframe.html:32 Unrecognized feature: 'unoptimized-images'.Understand this warning
+workspace_iframe.html:32 Unrecognized feature: 'unsized-media'.Understand this warning
+workspace_iframe.html:32 Allow attribute will take precedence over 'allowfullscreen'.Understand this warning
+workspace_iframe.html:32 Allow attribute will take precedence over 'allowpaymentrequest'.Understand this warning
+2Console.js:61 Warning: Encountered two children with the same key, `1753486427242`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+    at div
+    at div
+    at _c (https://33a3dcab-c7b1-464d-945a-b3ef977c5698-00-1jjp958uqvyad.worf.replit.dev/src/components/ui/card.tsx:20:11)
+    at AdvancedChatbot (https://33a3dcab-c7b1-464d-945a-b3ef977c5698-00-1jjp958uqvyad.worf.replit.dev/src/components/AdvancedChatbot.tsx:26:43)
+    at div
+    at div
+    at Dashboard (https://33a3dcab-c7b1-464d-945a-b3ef977c5698-00-1jjp958uqvyad.worf.replit.dev/src/pages/dashboard.tsx:30:53)
+    at Route (https://33a3dcab-c7b1-464d-945a-b3ef977c5698-00-1jjp958uqvyad.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=e4e67df8:323:16)
+    at Switch (https://33a3dcab-c7b1-464d-945a-b3ef977c5698-00-1jjp958uqvyad.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=e4e67df8:379:17)
+    at Router
+    at Provider (https://33a3dcab-c7b1-464d-945a-b3ef977c5698-00-1jjp958uqvyad.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-6JCLIPLF.js?v=e4e67df8:32:15)
+    at TooltipProvider (https://33a3dcab-c7b1-464d-945a-b3ef977c5698-00-1jjp958uqvyad.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=e4e67df8:57:5)
+    at QueryClientProvider (https://33a3dcab-c7b1-464d-945a-b3ef977c5698-00-1jjp958uqvyad.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=e4e67df8:2805:3)
+    at App
