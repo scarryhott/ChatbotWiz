@@ -25,10 +25,8 @@ export default function WebsiteAnalyzer({ onChatbotCreated }: WebsiteAnalyzerPro
 
   const analyzeMutation = useMutation({
     mutationFn: async (url: string) => {
-      return apiRequest('/api/analyze-website', {
-        method: 'POST',
-        body: JSON.stringify({ url })
-      });
+      const response = await apiRequest('POST', '/api/analyze-website', { url });
+      return await response.json();
     },
     onSuccess: (data) => {
       setAnalysis(data.analysis);
@@ -50,10 +48,8 @@ export default function WebsiteAnalyzer({ onChatbotCreated }: WebsiteAnalyzerPro
 
   const createChatbotMutation = useMutation({
     mutationFn: async (data: any) => {
-      return apiRequest('/api/chatbots', {
-        method: 'POST',
-        body: JSON.stringify(data)
-      });
+      const response = await apiRequest('POST', '/api/chatbots', data);
+      return await response.json();
     },
     onSuccess: (chatbot) => {
       queryClient.invalidateQueries({ queryKey: ["/api/chatbots"] });
