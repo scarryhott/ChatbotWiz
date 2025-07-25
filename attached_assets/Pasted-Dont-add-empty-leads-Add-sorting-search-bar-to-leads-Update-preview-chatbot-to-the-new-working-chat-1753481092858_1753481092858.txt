@@ -1,0 +1,69 @@
+Dont add empty leads
+Add sorting search bar to leads
+
+Update preview chatbot to the new working chatbot that’s working on the index page
+
+Update the tab to a green check every time user leaves or gemini switches out. Update the busssineesss firebase topic for that topic for the user id each tie
+
+Add ethos prompt filter to admin
+
+Make admin page horizontally arrange and have its chatbot on the same page
+
+
+Add more ui cosumization
+Add more actions to start bot and from different contexts
+Add more customization of bot chat
+Add ai customization for these based on website
+
+Add size of chatbot customization
+Toggle background of chat messages to transparent 
+Toggle message bubbles vs scroll(as in pirate scroll) mode
+
+Ensure Context
+
+End lead if user doesn’t have anymore questions about the next topic
+
+Collect ethos from email agent and use it to generate chatbot
+
+Yes — you can give users a truly “no‑code” install by having them point their DNS at your overlay service, which will proxy their site and inject your UI on the fly. Here’s a high‑level design:
+
+1. Why pure DNS + UI injection needs a proxy
+* DNS only maps names → IPs, it can’t itself add scripts to HTML.
+* If you host their domain through your servers (via an A‑record or CNAME), you can fetch their real site, inject your overlay code, then serve it back—no site‑owner code changes required.
+
+2. Onboarding flow
+1. User enters their domain (e.g. www.acme.com) in your dashboard.
+2. Your system automatically:
+    * Generates a reverse‑proxy route for that hostname.
+    * Boots up an NGINX/Node service that will fetch www.acme.com upstream.
+    * Prepares an SSL/TLS certificate (via Let’s Encrypt) for that hostname.
+3. You tell the user: “Please add a CNAME record pointing www.acme.com → your‑overlay‑gateway.com (or an A record to our IP at 12.34.56.78). Once DNS propagates, all traffic to www.acme.com will be routed through our overlay service—no further code needed.” 
+4. Once DNS is live, your gateway:
+    * Proxies every request to the real origin (the original www.acme.com server).
+    * Parses the HTML response and injects your chatbot & UI overlay snippet just before </body>.
+    * Streams it back over HTTPS to the user’s visitors.
+
+3. Technical components
+Piece	What it does
+DNS record	User points their domain at your gateway
+Overlay gateway	Reverse‑proxy + HTML injector
+SSL provisioning	Automatic Let’s Encrypt certs
+Injection script	Your chatbot CSS/JS snippet
+Dashboard UI	User enters domain, sees “Install complete”
+
+4. Advantages & trade‑offs
+* ✅ Truly zero‑code for your customer.
+* ✅ You fully control the injection logic—easy to update UI globally.
+* ⚠️ Must handle SSL, scaling, and origin‑fetch performance on your servers.
+* ⚠️ Root domains (apex) may require ALIAS/ANAME support rather than simple CNAME.
+
+5. Example: Cloudflare Workers alternative
+If you don’t want to run your own servers, you can leverage Cloudflare Workers:
+1. User points their domain at your Cloudflare account (via NS change).
+2. You deploy a Worker script that fetches their origin and resp.text() → injects your UI → returns it.
+3. Cloudflare manages the DNS, SSL, and scaling for you.
+
+Summary
+* Yes it’s possible, but you need a reverse‑proxy layer or a CDN/Worker in front of their site.
+* Users only touch DNS—no HTML/JS editing on their side.
+* You handle the injection, SSL/day‑to‑day operations, and versioning of the overlay UI.
