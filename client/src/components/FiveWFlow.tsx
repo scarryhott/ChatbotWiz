@@ -78,14 +78,14 @@ export default function FiveWFlow({ chatbot }: FiveWFlowProps) {
           <h4 className="font-medium text-gray-900">Topic Questions</h4>
           <div className="space-y-4">
             {TOPICS.slice(0, 2).map((topic) => {
-              const topicConfig = chatbot.config.topics[topic.key as keyof typeof chatbot.config.topics];
+              const topicConfig = chatbot.config.topics?.[topic.key as keyof typeof chatbot.config.topics];
               return (
                 <div key={topic.key} className="p-4 bg-gray-50 rounded-lg space-y-2">
                   <Label className="text-sm font-medium text-gray-700">
                     {topic.label} Question
                   </Label>
                   <Input
-                    defaultValue={topicConfig.question}
+                    defaultValue={topicConfig?.question || `What ${topic.label.toLowerCase()} information would you like to know?`}
                     placeholder={`Enter ${topic.label.toLowerCase()} question...`}
                     className="w-full"
                     onChange={(e) => {

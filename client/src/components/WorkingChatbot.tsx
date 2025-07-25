@@ -229,7 +229,7 @@ export default function WorkingChatbot({ chatbot, onLeadUpdate }: WorkingChatbot
   };
 
   const getDimensions = () => {
-    const { size } = chatbot.config.ui;
+    const size = chatbot.config.ui?.size || "medium";
     switch (size) {
       case "small": return "w-72 h-96";
       case "medium": return "w-80 h-[500px]";
@@ -240,7 +240,7 @@ export default function WorkingChatbot({ chatbot, onLeadUpdate }: WorkingChatbot
   };
 
   const getPosition = () => {
-    const { position } = chatbot.config.ui;
+    const position = chatbot.config.ui?.position || "bottom-right";
     switch (position) {
       case "bottom-left": return "bottom-6 left-6";
       case "center": return "top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2";
@@ -255,7 +255,7 @@ export default function WorkingChatbot({ chatbot, onLeadUpdate }: WorkingChatbot
         <Button
           onClick={() => setIsOpen(true)}
           className="rounded-full w-14 h-14 shadow-lg"
-          style={{ backgroundColor: chatbot.config.ui.theme.primaryColor }}
+          style={{ backgroundColor: chatbot.config.ui?.theme?.primaryColor || "#3b82f6" }}
         >
           <MessageSquare className="w-6 h-6" />
         </Button>
@@ -268,10 +268,10 @@ export default function WorkingChatbot({ chatbot, onLeadUpdate }: WorkingChatbot
       <Card className={cn(
         "flex flex-col overflow-hidden shadow-2xl border-0",
         getDimensions(),
-        chatbot.config.ui.transparentBackground && "bg-opacity-95 backdrop-blur-sm"
+        chatbot.config.ui?.transparentBackground && "bg-opacity-95 backdrop-blur-sm"
       )} style={{
-        backgroundColor: chatbot.config.ui.theme.backgroundColor,
-        borderRadius: `${chatbot.config.ui.theme.borderRadius}px`
+        backgroundColor: chatbot.config.ui?.theme?.backgroundColor || "#ffffff",
+        borderRadius: `${chatbot.config.ui?.theme?.borderRadius || 8}px`
       }}>
         {/* Header */}
         <div 
