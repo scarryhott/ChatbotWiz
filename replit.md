@@ -22,10 +22,10 @@ Preferred communication style: Simple, everyday language.
 ### Backend Architecture
 - **Runtime**: Node.js with Express.js
 - **Language**: TypeScript with ES modules
-- **Database ORM**: Drizzle ORM with PostgreSQL dialect
-- **Database Provider**: Neon Database (@neondatabase/serverless)
+- **Database**: PostgreSQL with Drizzle ORM for type-safe queries
+- **Database Provider**: Neon Database (@neondatabase/serverless) with connection pooling
 - **AI Integration**: Google Gemini AI for website analysis and chat responses
-- **Session Management**: Connect-pg-simple for PostgreSQL session storage
+- **Storage Layer**: DatabaseStorage implementing IStorage interface for all CRUD operations
 
 ### Project Structure
 - `client/`: Frontend React application
@@ -36,10 +36,11 @@ Preferred communication style: Simple, everyday language.
 ## Key Components
 
 ### Database Schema
-- **Users**: Basic user authentication and management
-- **Chatbots**: Chatbot configurations with domains and settings
-- **Leads**: Customer interactions with 5W progress tracking
+- **Users**: Basic user authentication (id, username, password)
+- **Chatbots**: Complete chatbot configurations with JSONB config storage
+- **Leads**: Customer interactions with 5W progress tracking and conversation history
 - **Firebase Topics**: Topic completion tracking for push notifications
+- **Database Features**: Auto-generated UUIDs, timestamps, foreign key relationships, JSONB for complex data
 
 ### AI Services
 - **Website Analyzer**: Analyzes websites to extract company information, ethos, and generates chatbot configurations

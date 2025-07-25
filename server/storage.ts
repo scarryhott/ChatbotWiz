@@ -1,5 +1,6 @@
-import { type User, type InsertUser, type Chatbot, type InsertChatbot, type Lead, type InsertLead, type FirebaseTopic, type InsertFirebaseTopic, type ChatbotConfig, type FiveWProgress } from "@shared/schema";
-import { randomUUID } from "crypto";
+import { users, chatbots, leads, firebaseTopics, type User, type InsertUser, type Chatbot, type InsertChatbot, type Lead, type InsertLead, type FirebaseTopic, type InsertFirebaseTopic } from "@shared/schema";
+import { db } from "./db";
+import { eq, like, and } from "drizzle-orm";
 
 export interface IStorage {
   // User methods
@@ -28,237 +29,340 @@ export interface IStorage {
   updateFirebaseTopic(id: string, updates: Partial<InsertFirebaseTopic>): Promise<FirebaseTopic>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<string, User>;
-  private chatbots: Map<string, Chatbot>;
-  private leads: Map<string, Lead>;
-  private firebaseTopics: Map<string, FirebaseTopic>;
-
+export class DatabaseStorage implements IStorage {
   constructor() {
-    this.users = new Map();
-    this.chatbots = new Map();
-    this.leads = new Map();
-    this.firebaseTopics = new Map();
-
-    // Initialize with demo user and chatbot
-    this.initializeDemo();
+    // Initialize demo data on first run
+    this.initializeDemoData();
   }
 
-  private initializeDemo() {
-    const demoUser: User = {
-      id: "demo-user-1",
-      username: "demo",
-      password: "demo123"
-    };
-    this.users.set(demoUser.id, demoUser);
+  private async initializeDemoData() {
+    try {
+      // Check if demo user already exists
+      const existingUser = await this.getUser("demo-user-1");
+      if (existingUser) return; // Demo data already exists
 
-    const demoChatbot: Chatbot = {
-      id: "demo-chatbot-1",
-      userId: demoUser.id,
-      name: "Demo AI Assistant",
-      domain: "demo.wwwwwai.com",
-      config: {
-        company: {
-          name: "Demo Company",
-          ethos: "We believe in empowering businesses through AI-driven customer engagement and innovative solutions.",
-          website: "https://demo.company.com",
-          knowledgeBase: "Our company specializes in AI solutions, customer engagement tools, and business automation."
-        },
-        topics: {
-          why: { 
-            question: "I noticed you're exploring our services - what's driving your interest in AI solutions today?", 
-            completed: false 
+      // Demo user
+      const demoUser = {
+        id: "demo-user-1",
+        username: "demo",
+        password: "password"
+      };
+      await db.insert(users).values(demoUser);
+
+      // Demo chatbot with comprehensive 5W configuration
+      const demoChatbot: Chatbot = {
+        id: "demo-chatbot-1",
+        userId: "demo-user-1",
+        name: "EcoSolutions Assistant",
+        domain: "ecosolutions.demo",
+        config: {
+          company: {
+            name: "EcoSolutions",
+            ethos: "We believe in sustainable technology solutions that help businesses reduce their environmental impact while increasing efficiency and profitability.",
+            website: "ecosolutions.demo",
+            knowledgeBase: "Solar Panel Installation, Energy Audits, Green Building Consulting, Sustainable IT Solutions. Pricing: Solar audit $299, Energy audit $199, Consulting $150/hour. Service areas: Austin, Dallas, Houston, San Antonio. Certifications: LEED Certified, Energy Star Partner, Solar Power International Member."
           },
-          what: { 
-            question: "What specific challenges or goals are you looking to address?", 
-            completed: false 
+          topics: {
+            why: {
+              question: "What environmental or cost concerns are driving your interest in sustainable solutions?",
+              completed: false,
+              value: undefined
+            },
+            what: {
+              question: "What specific sustainable solutions are you most interested in learning about?", 
+              completed: false,
+              value: undefined
+            },
+            when: {
+              question: "When are you looking to implement these sustainable solutions?",
+              completed: false,
+              value: undefined
+            },
+            where: {
+              question: "Where is your business or property located?",
+              completed: false,
+              value: undefined
+            },
+            who: {
+              question: "Who is the main decision-maker for sustainability initiatives at your organization?",
+              completed: false,
+              value: undefined
+            }
           },
-          when: { 
-            question: "What's your timeline for implementing these solutions?", 
-            completed: false 
+          ui: {
+            size: "medium",
+            position: "bottom-right",
+            transparentBackground: false,
+            scrollMode: false,
+            entryAnimation: "slide-up",
+            typingIndicator: "dots",
+            autoStartTrigger: "page-load",
+            theme: {
+              primaryColor: "#22c55e",
+              secondaryColor: "#16a34a",
+              backgroundColor: "#f0fdf4",
+              textColor: "#15803d",
+              borderRadius: 12
+            }
           },
-          where: { 
-            question: "Where would you be implementing this - what's the scope of your project?", 
-            completed: false 
+          ai: {
+            initialModel: "gemini-2.5-flash",
+            followUpModel: "gemini-2.5-flash",
+            ethosFilter: "Filter all responses through EcoSolutions' commitment to environmental sustainability and business profitability. Always emphasize both environmental benefits and cost savings."
           },
-          who: { 
-            question: "Who else would be involved in this decision-making process?", 
-            completed: false 
+          popupTrigger: {
+            enabled: true,
+            message: "Get sustainable solutions for your business",
+            delay: 30000
           }
         },
-        ui: {
-          size: "medium",
-          position: "bottom-right",
-          transparentBackground: false,
-          scrollMode: false,
-          entryAnimation: "slide-up",
-          typingIndicator: "dots",
-          autoStartTrigger: "5-second-delay",
-          theme: {
-            primaryColor: "#4F46E5",
-            secondaryColor: "#E0E7FF",
-            backgroundColor: "#FFFFFF",
-            textColor: "#1F2937",
-            borderRadius: 16
-          }
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      await db.insert(chatbots).values(demoChatbot);
+
+      // Demo leads with various 5W completion states
+      const demoLeads = [
+        {
+          id: "demo-lead-1",
+          chatbotId: "demo-chatbot-1",
+          name: "Sarah Johnson",
+          email: "sarah@techstartup.com",
+          phone: "+1-555-0123",
+          fiveWProgress: {
+            why: { completed: true, answer: "Looking to reduce energy costs and meet ESG requirements" },
+            what: { completed: true, answer: "Solar panels and energy audit" },
+            when: { completed: true, answer: "Next quarter" },
+            where: { completed: true, answer: "Austin, Texas" },
+            who: { completed: true, answer: "Sarah Johnson, Operations Manager" }
+          },
+          specificRequests: "Solar installation for corporate office",
+          contextSummary: "TechStartup Inc operations manager interested in ESG compliance",
+          conversationHistory: [],
+          currentTopic: "who",
+          isCompleted: true
         },
-        ai: {
-          initialModel: "gemini-2.5-flash",
-          followUpModel: "gemini-2.5-flash",
-          ethosFilter: "Focus on understanding business needs and providing valuable insights about our solutions. Be conversational and helpful."
+        {
+          id: "demo-lead-2",
+          chatbotId: "demo-chatbot-1",
+          name: "Mike Chen", 
+          email: "m.chen@retailcorp.com",
+          phone: null,
+          fiveWProgress: {
+            why: { completed: true, answer: "Corporate mandate to reduce carbon footprint" },
+            what: { completed: true, answer: "Comprehensive energy audit and LEED consulting" },
+            when: { completed: false },
+            where: { completed: false },
+            who: { completed: false }
+          },
+          specificRequests: "Energy audit for retail chain",
+          contextSummary: "RetailCorp facilities director exploring LEED certification",
+          conversationHistory: [],
+          currentTopic: "when",
+          isCompleted: false
         },
-        popupTrigger: {
-          enabled: true,
-          message: "Hi! I noticed you're checking out our AI solutions. I'm here to help you find exactly what you need. What brings you here today?",
-          delay: 3
+        {
+          id: "demo-lead-3",
+          chatbotId: "demo-chatbot-1",
+          name: "Jennifer Rodriguez",
+          email: "jen.rodriguez@hospitalgroup.org", 
+          phone: "+1-555-0456",
+          fiveWProgress: {
+            why: { completed: true, answer: "Hospital system wants to reduce operating costs and environmental impact" },
+            what: { completed: false },
+            when: { completed: false },
+            where: { completed: false },
+            who: { completed: false }
+          },
+          specificRequests: "Sustainability solutions for healthcare",
+          contextSummary: "Hospital group sustainability coordinator",
+          conversationHistory: [],
+          currentTopic: "what",
+          isCompleted: false
         }
-      },
-      isActive: true,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
-    this.chatbots.set(demoChatbot.id, demoChatbot);
+      ];
+
+      await db.insert(leads).values(demoLeads);
+
+      // Demo Firebase topics
+      const demoTopics: FirebaseTopic[] = [
+        {
+          id: "demo-topic-1",
+          userId: "demo-user-1",
+          leadId: "demo-lead-1",
+          topic: "why",
+          isCompleted: true,
+          completedAt: new Date(Date.now() - 86400000)
+        },
+        {
+          id: "demo-topic-2",
+          userId: "demo-user-1",
+          leadId: "demo-lead-1", 
+          topic: "what",
+          isCompleted: true,
+          completedAt: new Date(Date.now() - 86400000)
+        },
+        {
+          id: "demo-topic-3",
+          userId: "demo-user-1",
+          leadId: "demo-lead-2",
+          topic: "why",
+          isCompleted: true,
+          completedAt: new Date(Date.now() - 172800000)
+        }
+      ];
+
+      await db.insert(firebaseTopics).values(demoTopics);
+    } catch (error) {
+      console.error("Error initializing demo data:", error);
+      // Continue anyway - this is just demo data
+    }
   }
 
   // User methods
   async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(user => user.username === username);
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
+    const [user] = await db
+      .insert(users)
+      .values(insertUser)
+      .returning();
     return user;
   }
 
   // Chatbot methods
   async getChatbot(id: string): Promise<Chatbot | undefined> {
-    return this.chatbots.get(id);
+    const [chatbot] = await db.select().from(chatbots).where(eq(chatbots.id, id));
+    return chatbot || undefined;
   }
 
   async getChatbotsByUserId(userId: string): Promise<Chatbot[]> {
-    return Array.from(this.chatbots.values()).filter(chatbot => chatbot.userId === userId);
+    return await db.select().from(chatbots).where(eq(chatbots.userId, userId));
   }
 
   async createChatbot(insertChatbot: InsertChatbot): Promise<Chatbot> {
-    const id = randomUUID();
-    const chatbot: Chatbot = {
-      ...insertChatbot,
-      id,
-      domain: insertChatbot.domain || null,
-      isActive: insertChatbot.isActive ?? true,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
-    this.chatbots.set(id, chatbot);
+    const [chatbot] = await db
+      .insert(chatbots)
+      .values({
+        ...insertChatbot,
+        domain: insertChatbot.domain || null,
+        isActive: insertChatbot.isActive ?? true,
+      })
+      .returning();
     return chatbot;
   }
 
   async updateChatbot(id: string, updates: Partial<InsertChatbot>): Promise<Chatbot> {
-    const existing = this.chatbots.get(id);
-    if (!existing) {
-      throw new Error(`Chatbot with id ${id} not found`);
-    }
-    const updated: Chatbot = {
-      ...existing,
-      ...updates,
-      updatedAt: new Date()
-    };
-    this.chatbots.set(id, updated);
-    return updated;
+    const [chatbot] = await db
+      .update(chatbots)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(chatbots.id, id))
+      .returning();
+    return chatbot;
   }
 
   async deleteChatbot(id: string): Promise<void> {
-    if (!this.chatbots.has(id)) {
-      throw new Error(`Chatbot with id ${id} not found`);
-    }
-    this.chatbots.delete(id);
+    await db.delete(chatbots).where(eq(chatbots.id, id));
   }
 
   // Lead methods
   async getLead(id: string): Promise<Lead | undefined> {
-    return this.leads.get(id);
+    const [lead] = await db.select().from(leads).where(eq(leads.id, id));
+    return lead || undefined;
   }
 
   async getLeadsByChatbotId(chatbotId: string): Promise<Lead[]> {
-    return Array.from(this.leads.values()).filter(lead => lead.chatbotId === chatbotId);
+    return await db.select().from(leads).where(eq(leads.chatbotId, chatbotId));
   }
 
   async createLead(insertLead: InsertLead): Promise<Lead> {
-    const id = randomUUID();
-    const lead: Lead = {
-      ...insertLead,
-      id,
-      name: insertLead.name || null,
-      email: insertLead.email || null,
-      phone: insertLead.phone || null,
-      isCompleted: insertLead.isCompleted ?? false,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
-    this.leads.set(id, lead);
+    const [lead] = await db
+      .insert(leads)
+      .values({
+        ...insertLead,
+        name: insertLead.name || null,
+        email: insertLead.email || null,
+        phone: insertLead.phone || null,
+        isCompleted: insertLead.isCompleted ?? false,
+      })
+      .returning();
     return lead;
   }
 
   async updateLead(id: string, updates: Partial<InsertLead>): Promise<Lead> {
-    const existing = this.leads.get(id);
-    if (!existing) {
-      throw new Error(`Lead with id ${id} not found`);
-    }
-    const updated: Lead = {
-      ...existing,
-      ...updates,
-      updatedAt: new Date()
-    };
-    this.leads.set(id, updated);
-    return updated;
+    const [lead] = await db
+      .update(leads)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(leads.id, id))
+      .returning();
+    return lead;
   }
 
   async searchLeads(chatbotId: string, query: string): Promise<Lead[]> {
-    const leads = await this.getLeadsByChatbotId(chatbotId);
-    if (!query.trim()) return leads;
-    
-    const lowerQuery = query.toLowerCase();
-    return leads.filter(lead => 
-      (lead.name?.toLowerCase().includes(lowerQuery)) ||
-      (lead.email?.toLowerCase().includes(lowerQuery)) ||
-      (lead.contextSummary?.toLowerCase().includes(lowerQuery))
-    );
+    return await db
+      .select()
+      .from(leads)
+      .where(
+        and(
+          eq(leads.chatbotId, chatbotId),
+          like(leads.name, `%${query}%`)
+        )
+      );
   }
 
   async getLeadsByCompletion(chatbotId: string, completed: boolean): Promise<Lead[]> {
-    const leads = await this.getLeadsByChatbotId(chatbotId);
-    return leads.filter(lead => lead.isCompleted === completed);
+    return await db
+      .select()
+      .from(leads)
+      .where(
+        and(
+          eq(leads.chatbotId, chatbotId),
+          eq(leads.isCompleted, completed)
+        )
+      );
   }
 
   // Firebase topic methods
   async getFirebaseTopics(userId: string, leadId: string): Promise<FirebaseTopic[]> {
-    return Array.from(this.firebaseTopics.values()).filter(
-      topic => topic.userId === userId && topic.leadId === leadId
-    );
+    return await db
+      .select()
+      .from(firebaseTopics)
+      .where(
+        and(
+          eq(firebaseTopics.userId, userId),
+          eq(firebaseTopics.leadId, leadId)
+        )
+      );
   }
 
   async createFirebaseTopic(insertTopic: InsertFirebaseTopic): Promise<FirebaseTopic> {
-    const id = randomUUID();
-    const topic: FirebaseTopic = { ...insertTopic, id };
-    this.firebaseTopics.set(id, topic);
+    const [topic] = await db
+      .insert(firebaseTopics)
+      .values({
+        ...insertTopic,
+        isCompleted: insertTopic.isCompleted ?? false,
+      })
+      .returning();
     return topic;
   }
 
   async updateFirebaseTopic(id: string, updates: Partial<InsertFirebaseTopic>): Promise<FirebaseTopic> {
-    const existing = this.firebaseTopics.get(id);
-    if (!existing) {
-      throw new Error(`Firebase topic with id ${id} not found`);
-    }
-    const updated: FirebaseTopic = { ...existing, ...updates };
-    this.firebaseTopics.set(id, updated);
-    return updated;
+    const [topic] = await db
+      .update(firebaseTopics)
+      .set(updates)
+      .where(eq(firebaseTopics.id, id))
+      .returning();
+    return topic;
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
