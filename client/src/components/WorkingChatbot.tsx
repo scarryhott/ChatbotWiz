@@ -41,14 +41,14 @@ export default function WorkingChatbot({ chatbot, onLeadUpdate }: WorkingChatbot
 
   // Auto-trigger popup based on configuration
   useEffect(() => {
-    if (chatbot.config.popupTrigger.enabled) {
+    if (chatbot.config.popupTrigger?.enabled) {
       const timer = setTimeout(() => {
         setIsOpen(true);
         // Send initial WHY message
         const initialMessage: ConversationMessage = {
           id: Date.now().toString(),
           type: "bot",
-          content: chatbot.config.popupTrigger.message,
+          content: chatbot.config.popupTrigger?.message || "Hello! How can I help you today?",
           timestamp: new Date().toISOString(),
           topic: "why"
         };
@@ -60,7 +60,7 @@ export default function WorkingChatbot({ chatbot, onLeadUpdate }: WorkingChatbot
           "I have a specific need",
           "Just browsing for now"
         ]);
-      }, chatbot.config.popupTrigger.delay * 1000);
+      }, (chatbot.config.popupTrigger?.delay || 5) * 1000);
 
       return () => clearTimeout(timer);
     }
