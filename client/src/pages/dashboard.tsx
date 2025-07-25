@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Sidebar from "@/components/Sidebar";
 import ConfigurationTabs from "@/components/ConfigurationTabs";
-import WorkingChatbot from "@/components/WorkingChatbot";
+import AdvancedChatbot from "@/components/AdvancedChatbot";
 import LeadManagement from "@/components/LeadManagement";
 import WebsiteAnalyzer from "@/components/WebsiteAnalyzer";
 import { useQuery } from "@tanstack/react-query";
@@ -141,9 +141,9 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Working Chatbot - Always visible */}
+        {/* Advanced Chatbot - Always visible */}
         {selectedChatbot && (
-          <WorkingChatbot 
+          <AdvancedChatbot 
             chatbot={selectedChatbot} 
             onLeadUpdate={(leadData) => {
               console.log("New lead captured:", leadData);
