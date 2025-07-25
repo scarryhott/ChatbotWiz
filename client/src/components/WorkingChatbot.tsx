@@ -73,15 +73,13 @@ export default function WorkingChatbot({ chatbot, onLeadUpdate }: WorkingChatbot
 
   const chatMutation = useMutation({
     mutationFn: async (data: { message: string; topic: string; history: ConversationMessage[] }) => {
-      return apiRequest(`/api/chat`, {
-        method: "POST",
-        body: JSON.stringify({
-          message: data.message,
-          chatbotId: chatbot.id,
-          currentTopic: data.topic,
-          conversationHistory: data.history
-        })
+      const response = await apiRequest('POST', '/api/chat', {
+        message: data.message,
+        chatbotId: chatbot.id,
+        currentTopic: data.topic,
+        conversationHistory: data.history
       });
+      return await response.json();
     },
     onSuccess: (response) => {
       setIsTyping(false);
