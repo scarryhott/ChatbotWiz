@@ -2,12 +2,15 @@ import { useState } from "react";
 import Sidebar from "@/components/Sidebar";
 import ConfigurationTabs from "@/components/ConfigurationTabs";
 import AdvancedChatbot from "@/components/AdvancedChatbot";
+import { EnhancedChatbot } from "@/components/EnhancedChatbot";
 import LeadManagement from "@/components/LeadManagement";
 import WebsiteAnalyzer from "@/components/WebsiteAnalyzer";
+import InstallationTab from "@/components/InstallationTab";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Save, Code, Globe, Settings, BarChart3 } from "lucide-react";
+import { Save, Code, Globe, Settings, BarChart3, Download } from "lucide-react";
+import { adaptChatbotConfig } from "@/utils/configAdapter";
 import type { Chatbot } from "@shared/schema";
 
 export default function Dashboard() {
@@ -75,10 +78,10 @@ export default function Dashboard() {
 
           <div className="p-6">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="create" className="flex items-center space-x-2">
                   <Globe className="w-4 h-4" />
-                  <span>Create Chatbot</span>
+                  <span>Create</span>
                 </TabsTrigger>
                 <TabsTrigger value="configure" className="flex items-center space-x-2">
                   <Settings className="w-4 h-4" />
@@ -91,6 +94,10 @@ export default function Dashboard() {
                 <TabsTrigger value="preview" className="flex items-center space-x-2">
                   <Code className="w-4 h-4" />
                   <span>Preview</span>
+                </TabsTrigger>
+                <TabsTrigger value="install" className="flex items-center space-x-2">
+                  <Download className="w-4 h-4" />
+                  <span>Install</span>
                 </TabsTrigger>
               </TabsList>
 
@@ -137,18 +144,32 @@ export default function Dashboard() {
                   )}
                 </div>
               </TabsContent>
+
+              <TabsContent value="install" className="space-y-6">
+                {selectedChatbot ? (
+                  <InstallationTab chatbot={selectedChatbot} />
+                ) : (
+                  <div className="text-center py-12">
+                    <p className="text-gray-500">Select or create a chatbot to view installation instructions</p>
+                  </div>
+                )}
+              </TabsContent>
             </Tabs>
           </div>
         </div>
 
-        {/* Advanced Chatbot - Always visible */}
+        {/* Enhanced Chatbot - Always visible */}
         {selectedChatbot && (
-          <AdvancedChatbot 
-            chatbot={selectedChatbot} 
+          <EnhancedChatbot 
+            config={adaptChatbotConfig(selectedChatbot)}
             onLeadUpdate={(leadData) => {
               console.log("New lead captured:", leadData);
               setActiveTab("leads");
             }}
+            onConversationUpdate={(messages) => {
+              console.log("Conversation updated:", messages);
+            }}
+            className="w-96 h-full"
           />
         )}
       </div>

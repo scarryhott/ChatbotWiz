@@ -1,0 +1,577 @@
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Send, MessageCircle, User, Bot, Check, Clock, MapPin, Calendar, HelpCircle, Phone } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+interface ChatbotConfig {
+  businessName: string;
+  location: string;
+  services: string;
+  experience: string;
+  specialties: string;
+  serviceAreas: string;
+  industry: string;
+  phone: string;
+  email: string;
+  website: string;
+  ui: {
+    theme: {
+      primaryColor: string;
+      secondaryColor: string;
+      textColor: string;
+      backgroundColor: string;
+    };
+    position: string;
+    animation: string;
+    showTabs: boolean;
+    autoStart: boolean;
+  };
+  conversation: {
+    topics: Array<{
+      id: string;
+      title: string;
+      question: string;
+      info: string;
+      icon: string;
+    }>;
+    flow: string;
+    maxFollowUps: number;
+  };
+  ai: {
+    model: string;
+    provider: string;
+    maxTokens: number;
+  };
+}
+
+interface ConversationMessage {
+  id: string;
+  type: 'user' | 'bot';
+  content: string;
+  timestamp: string;
+  topic: string;
+  quickReplies?: string[];
+}
+
+interface LeadData {
+  name: string;
+  email: string;
+  phone: string;
+  location: string;
+  service: string;
+  message: string;
+  specificRequests: string;
+  conversationFlow: ConversationMessage[];
+  topicResponses: Record<string, any>;
+  timestamp: string;
+}
+
+interface EnhancedChatbotProps {
+  config: ChatbotConfig;
+  onLeadUpdate?: (lead: LeadData) => void;
+  onConversationUpdate?: (messages: ConversationMessage[]) => void;
+  className?: string;
+  style?: React.CSSProperties;
+}
+
+const generateMessageId = () => `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+const generateUserId = () => `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+export function EnhancedChatbot({ 
+  config, 
+  onLeadUpdate, 
+  onConversationUpdate,
+  className,
+  style 
+}: EnhancedChatbotProps) {
+  // Core state management
+  const [messages, setMessages] = useState<ConversationMessage[]>([]);
+  const [currentMessage, setCurrentMessage] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [currentTopicIndex, setCurrentTopicIndex] = useState(2); // Start with WHY (index 2)
+  const [completedTopics, setCompletedTopics] = useState<Set<string>>(new Set());
+  const [activeTab, setActiveTab] = useState('WHY');
+  const [chatAreaMessages, setChatAreaMessages] = useState<Record<string, ConversationMessage[]>>({
+    'WHO': [],
+    'WHAT': [],
+    'WHY': [],
+    'WHERE': [],
+    'WHEN': []
+  });
+  
+  // Lead data tracking
+  const [leadData, setLeadData] = useState<LeadData>({
+    name: '',
+    email: '',
+    phone: '',
+    location: '',
+    service: '',
+    message: '',
+    specificRequests: '',
+    conversationFlow: [],
+    topicResponses: {},
+    timestamp: new Date().toISOString()
+  });
+
+  // Refs
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const userId = useRef(generateUserId());
+
+  // Business info from config
+  const businessInfo = {
+    name: config.businessName,
+    location: config.location,
+    services: config.services,
+    experience: config.experience,
+    specialties: config.specialties,
+    serviceAreas: config.serviceAreas,
+    industry: config.industry,
+    phone: config.phone,
+    email: config.email,
+    website: config.website
+  };
+
+  // Topics configuration - Enhanced 5W framework
+  const topics = [
+    { 
+      id: 'WHO', 
+      title: 'Contact Info',
+      question: 'How would you prefer we contact you?', 
+      info: `We can reach out via phone, email, or text - whatever works best for you.`,
+      icon: Phone,
+      done: false,
+      responses: []
+    },
+    { 
+      id: 'WHAT', 
+      title: 'Service Needed',
+      question: `What ${businessInfo.industry} services do you need?`, 
+      info: `We offer ${businessInfo.services}.`,
+      icon: HelpCircle,
+      done: false,
+      responses: []
+    },
+    { 
+      id: 'WHY', 
+      title: 'Your Needs',
+      question: `What specific ${businessInfo.industry} challenges are you facing?`, 
+      info: `We specialize in ${businessInfo.specialties} and provide exceptional service.`,
+      icon: MessageCircle,
+      done: false,
+      responses: []
+    },
+    { 
+      id: 'WHERE', 
+      title: 'Location',
+      question: 'What area are you located in?', 
+      info: `We serve ${businessInfo.serviceAreas}.`,
+      icon: MapPin,
+      done: false,
+      responses: []
+    },
+    { 
+      id: 'WHEN', 
+      title: 'Timing',
+      question: 'When do you need service?', 
+      info: 'We offer flexible scheduling to meet your needs.',
+      icon: Calendar,
+      done: false,
+      responses: []
+    }
+  ];
+
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chatAreaMessages, activeTab]);
+
+  // Initialize conversation
+  useEffect(() => {
+    if (config.ui.autoStart) {
+      setTimeout(() => {
+        startConversation();
+      }, 1000);
+    }
+  }, []);
+
+  // Update parent components when conversation changes
+  useEffect(() => {
+    const allMessages = Object.values(chatAreaMessages).flat();
+    if (onConversationUpdate) {
+      onConversationUpdate(allMessages);
+    }
+  }, [chatAreaMessages, onConversationUpdate]);
+
+  const startConversation = useCallback(() => {
+    const welcomeMessage: ConversationMessage = {
+      id: generateMessageId(),
+      type: 'bot',
+      content: `Hi! I'm the ${businessInfo.name} assistant. I'm here to learn about your ${businessInfo.industry} needs and connect you with our team. Let's start with understanding what brings you here today.`,
+      timestamp: new Date().toISOString(),
+      topic: 'WHY',
+      quickReplies: [
+        'I need service information',
+        'I have a specific problem',
+        'I want to learn more about your company'
+      ]
+    };
+
+    setChatAreaMessages(prev => ({
+      ...prev,
+      'WHY': [welcomeMessage]
+    }));
+
+    // Ask the first topic question
+    setTimeout(() => {
+      askTopicQuestion('WHY');
+    }, 1500);
+  }, [businessInfo]);
+
+  const askTopicQuestion = useCallback((topicId: string) => {
+    const topic = topics.find(t => t.id === topicId);
+    if (!topic) return;
+
+    const questionMessage: ConversationMessage = {
+      id: generateMessageId(),
+      type: 'bot',
+      content: topic.question,
+      timestamp: new Date().toISOString(),
+      topic: topicId
+    };
+
+    setChatAreaMessages(prev => ({
+      ...prev,
+      [topicId]: [...(prev[topicId] || []), questionMessage]
+    }));
+
+    setActiveTab(topicId);
+  }, [topics]);
+
+  const callGeminiAPI = async (userMessage: string, topic: string): Promise<string> => {
+    try {
+      setIsProcessing(true);
+      
+      const conversationHistory = chatAreaMessages[topic] || [];
+      const context = `
+        You are a chatbot for ${businessInfo.name}, a ${businessInfo.industry} company in ${businessInfo.location}.
+        
+        BUSINESS CONTEXT:
+        - Services: ${businessInfo.services}
+        - Experience: ${businessInfo.experience}
+        - Specialties: ${businessInfo.specialties}
+        - Service Areas: ${businessInfo.serviceAreas}
+        - Contact: ${businessInfo.phone} | ${businessInfo.email}
+        
+        CURRENT TOPIC: ${topic} - ${topics.find(t => t.id === topic)?.title}
+        
+        CONVERSATION GUIDELINES:
+        - Be helpful, friendly, and professional
+        - Keep responses concise (2-3 sentences)
+        - Focus on the current topic: ${topic}
+        - Ask relevant follow-up questions
+        - Provide specific information about our services when appropriate
+        
+        USER MESSAGE: ${userMessage}
+      `;
+
+      // Simulate API call with realistic response
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Generate contextual response based on topic and message
+      let response = '';
+      
+      if (topic === 'WHY') {
+        if (userMessage.toLowerCase().includes('problem') || userMessage.toLowerCase().includes('issue')) {
+          response = `I understand you're facing some challenges. ${businessInfo.name} has ${businessInfo.experience} and specializes in ${businessInfo.specialties}. Can you tell me more about the specific issue you're dealing with?`;
+        } else if (userMessage.toLowerCase().includes('service') || userMessage.toLowerCase().includes('information')) {
+          response = `Great! We provide ${businessInfo.services} throughout ${businessInfo.serviceAreas}. What specific service are you most interested in learning about?`;
+        } else {
+          response = `Thanks for sharing that with me. ${businessInfo.name} is here to help with all your ${businessInfo.industry} needs. What's the main reason you're looking for our services today?`;
+        }
+      } else if (topic === 'WHAT') {
+        response = `Perfect! We offer comprehensive ${businessInfo.services}. Based on what you've shared, I think we can definitely help. Which of these services interests you most?`;
+      } else if (topic === 'WHERE') {
+        response = `Got it! We serve ${businessInfo.serviceAreas}. We're familiar with that area and can definitely provide service there. Is this for residential or commercial property?`;
+      } else if (topic === 'WHEN') {
+        response = `That timeline works well for us. We offer flexible scheduling and can often accommodate urgent needs. Would you prefer a specific time of day or day of the week?`;
+      } else if (topic === 'WHO') {
+        response = `Perfect! I have all the information I need. One of our ${businessInfo.name} experts will reach out to you soon using your preferred contact method to discuss your needs.`;
+      } else {
+        response = `Thank you for that information. I'm here to help connect you with our team. Is there anything else you'd like to know about our services?`;
+      }
+      
+      return response;
+      
+    } catch (error) {
+      console.error('Error calling Gemini API:', error);
+      return `I'd be happy to help! Our team at ${businessInfo.name} can provide detailed information about your ${businessInfo.industry} needs.`;
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleSendMessage = async () => {
+    if (!currentMessage.trim() || isProcessing) return;
+
+    const userMessage: ConversationMessage = {
+      id: generateMessageId(),
+      type: 'user',
+      content: currentMessage.trim(),
+      timestamp: new Date().toISOString(),
+      topic: activeTab
+    };
+
+    // Add user message to current tab
+    setChatAreaMessages(prev => ({
+      ...prev,
+      [activeTab]: [...(prev[activeTab] || []), userMessage]
+    }));
+
+    setCurrentMessage('');
+    setIsTyping(true);
+
+    try {
+      // Get AI response
+      const response = await callGeminiAPI(userMessage.content, activeTab);
+      
+      // Create bot response
+      const botMessage: ConversationMessage = {
+        id: generateMessageId(),
+        type: 'bot',
+        content: response,
+        timestamp: new Date().toISOString(),
+        topic: activeTab
+      };
+
+      setChatAreaMessages(prev => ({
+        ...prev,
+        [activeTab]: [...(prev[activeTab] || []), botMessage]
+      }));
+
+      // Update lead data
+      const updatedLeadData = {
+        ...leadData,
+        conversationFlow: [...leadData.conversationFlow, userMessage, botMessage],
+        topicResponses: {
+          ...leadData.topicResponses,
+          [activeTab]: [...(leadData.topicResponses[activeTab] || []), userMessage.content]
+        }
+      };
+      
+      setLeadData(updatedLeadData);
+      
+      if (onLeadUpdate) {
+        onLeadUpdate(updatedLeadData);
+      }
+
+      // Check if topic should be marked complete and move to next
+      setTimeout(() => {
+        const currentTabMessages = (chatAreaMessages[activeTab] || []).length;
+        const completedArray = Array.from(completedTopics);
+        if (currentTabMessages >= 4 && !completedArray.includes(activeTab)) {
+          markTopicComplete(activeTab);
+        }
+      }, 2000);
+
+    } catch (error) {
+      console.error('Error processing message:', error);
+    } finally {
+      setIsTyping(false);
+    }
+  };
+
+  const markTopicComplete = (topicId: string) => {
+    setCompletedTopics(prev => new Set(Array.from(prev).concat([topicId])));
+    
+    // Move to next topic in sequence
+    const currentIndex = topics.findIndex(t => t.id === topicId);
+    const nextIndex = (currentIndex + 1) % topics.length;
+    const nextTopic = topics[nextIndex];
+    
+    const completedArray = Array.from(completedTopics);
+    if (!completedArray.includes(nextTopic.id)) {
+      setTimeout(() => {
+        askTopicQuestion(nextTopic.id);
+      }, 1500);
+    }
+  };
+
+  const handleTabClick = (topicId: string) => {
+    setActiveTab(topicId);
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
+
+  const handleQuickReply = (reply: string) => {
+    setCurrentMessage(reply);
+    setTimeout(() => {
+      handleSendMessage();
+    }, 100);
+  };
+
+  const currentMessages = chatAreaMessages[activeTab] || [];
+  const lastMessage = currentMessages[currentMessages.length - 1];
+  const showQuickReplies = lastMessage?.type === 'bot' && lastMessage.quickReplies;
+
+  return (
+    <Card 
+      className={cn("flex flex-col h-full bg-white overflow-hidden", className)}
+      style={{
+        ...style,
+        borderColor: config.ui.theme.primaryColor
+      }}
+    >
+      {/* Header */}
+      <div 
+        className="p-4 text-white text-center"
+        style={{ 
+          background: `linear-gradient(135deg, ${config.ui.theme.primaryColor}, ${config.ui.theme.secondaryColor})`
+        }}
+      >
+        <div className="flex items-center justify-center gap-3 mb-2">
+          <div 
+            className="w-10 h-10 rounded-full flex items-center justify-center text-xl"
+            style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}
+          >
+            🤖
+          </div>
+          <h1 className="text-lg font-semibold">{businessInfo.name}</h1>
+        </div>
+        <p className="text-sm opacity-90">{businessInfo.services} - {businessInfo.location}</p>
+      </div>
+
+      {/* Topic Tabs */}
+      {config.ui.showTabs && (
+        <div className="flex bg-gray-50 border-b overflow-x-auto">
+          {topics.map((topic) => {
+            const Icon = topic.icon;
+            const isActive = activeTab === topic.id;
+            const completedArray = Array.from(completedTopics);
+            const isCompleted = completedArray.includes(topic.id);
+            
+            return (
+              <button
+                key={topic.id}
+                onClick={() => handleTabClick(topic.id)}
+                className={cn(
+                  "flex flex-col items-center p-3 min-w-[80px] transition-all border-b-2",
+                  isActive 
+                    ? "border-blue-500 bg-blue-50 text-blue-600"
+                    : "border-transparent hover:bg-gray-100"
+                )}
+              >
+                <div className="relative">
+                  <Icon size={18} />
+                  {isCompleted && (
+                    <Check 
+                      size={12} 
+                      className="absolute -top-1 -right-1 text-green-500 bg-white rounded-full"
+                    />
+                  )}
+                </div>
+                <span className="text-xs font-medium mt-1">{topic.title}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Messages Area */}
+      <ScrollArea className="flex-1 p-4">
+        <div className="space-y-4">
+          {currentMessages.map((message) => (
+            <div
+              key={message.id}
+              className={cn(
+                "flex",
+                message.type === 'user' ? "justify-end" : "justify-start"
+              )}
+            >
+              <div
+                className={cn(
+                  "max-w-[80%] p-3 rounded-lg",
+                  message.type === 'user'
+                    ? "text-white"
+                    : "bg-gray-100 text-gray-800"
+                )}
+                style={message.type === 'user' ? { backgroundColor: config.ui.theme.primaryColor } : {}}
+              >
+                <p className="text-sm leading-relaxed">{message.content}</p>
+              </div>
+            </div>
+          ))}
+          
+          {isTyping && (
+            <div className="flex justify-start">
+              <div className="bg-gray-100 p-3 rounded-lg">
+                <div className="flex space-x-1">
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+                </div>
+              </div>
+            </div>
+          )}
+          
+          <div ref={messagesEndRef} />
+        </div>
+      </ScrollArea>
+
+      {/* Quick Replies */}
+      {showQuickReplies && (
+        <div className="px-4 pb-2">
+          <div className="flex flex-wrap gap-2">
+            {lastMessage.quickReplies?.map((reply, index) => (
+              <Button
+                key={index}
+                variant="outline"
+                size="sm"
+                onClick={() => handleQuickReply(reply)}
+                className="text-xs"
+                style={{ borderColor: config.ui.theme.primaryColor, color: config.ui.theme.primaryColor }}
+              >
+                {reply}
+              </Button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Input Area */}
+      <div className="p-4 border-t bg-gray-50">
+        <div className="flex space-x-2">
+          <Input
+            ref={inputRef}
+            value={currentMessage}
+            onChange={(e) => setCurrentMessage(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder="Type your message here..."
+            disabled={isProcessing}
+            className="flex-1"
+          />
+          <Button
+            onClick={handleSendMessage}
+            disabled={!currentMessage.trim() || isProcessing}
+            size="sm"
+            style={{ backgroundColor: config.ui.theme.primaryColor }}
+          >
+            <Send size={16} />
+          </Button>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+export default EnhancedChatbot;

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WWWWW.AI - Universal Service Chatbot</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="notifications.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Firebase Integration Scripts -->
+    <script type="module" src="firebase-config.js"></script>
+    <script src="sheets-integration.js"></script>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon" id="businessIcon">🤖</div>
+                    <h1 id="businessName">WWWWW.AI</h1>
+                </div>
+                <p class="tagline" id="businessTagline">Universal Service Chatbot Platform</p>
+            </div>
+        </div>
+        
+        <!-- Topic Navigation Tabs -->
+        <div class="topic-tabs" id="topicTabs" style="display: none;">
+            <div class="tab-container">
+                <div class="tab" data-topic="WHO">
+                    <span class="tab-icon">👤</span>
+                    <span class="tab-title">Who</span>
+                    <span class="tab-status"></span>
+                </div>
+                <div class="tab" data-topic="WHAT">
+                    <span class="tab-icon">🔧</span>
+                    <span class="tab-title">What</span>
+                    <span class="tab-status"></span>
+                </div>
+                <div class="tab active" data-topic="WHY">
+                    <span class="tab-icon">💡</span>
+                    <span class="tab-title">Why</span>
+                    <span class="tab-status"></span>
+                </div>
+                <div class="tab" data-topic="WHERE">
+                    <span class="tab-icon">📍</span>
+                    <span class="tab-title">Where</span>
+                    <span class="tab-status"></span>
+                </div>
+                <div class="tab" data-topic="WHEN">
+                    <span class="tab-icon">⏰</span>
+                    <span class="tab-title">When</span>
+                    <span class="tab-status"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Messages Container with Individual Topic Chats -->
+        <div class="chat-messages-container">
+            <!-- Topic-specific Chat Areas -->
+            <div class="chat-messages" id="chatMessages-WHO" data-topic="WHO">
+                <!-- WHO topic messages -->
+            </div>
+            
+            <div class="chat-messages" id="chatMessages-WHAT" data-topic="WHAT">
+                <!-- WHAT topic messages -->
+            </div>
+            
+            <div class="chat-messages active" id="chatMessages-WHY" data-topic="WHY">
+                <!-- WHY topic messages -->
+            </div>
+            
+            <div class="chat-messages" id="chatMessages-WHERE" data-topic="WHERE">
+                <!-- WHERE topic messages -->
+            </div>
+            
+            <div class="chat-messages" id="chatMessages-WHEN" data-topic="WHEN">
+                <!-- WHEN topic messages -->
+            </div>
+        </div>
+
+        <!-- Topic Information Panel -->
+        <div class="topic-info-panel" id="topicInfoPanel" style="display: none;">
+            <div class="topic-header">
+                <h3 id="topicTitle"></h3>
+                <button class="close-topic-btn" id="closeTopicBtn">×</button>
+            </div>
+            <div class="topic-content">
+                <p id="topicInfo"></p>
+                <div class="topic-responses" id="topicResponses"></div>
+            </div>
+        </div>
+        
+        <div class="chat-input-container">
+            <div class="chat-input">
+                <input type="text" id="messageInput" placeholder="Type your message here..." autocomplete="off">
+                <button id="sendButton">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="chatbot.js"></script>
+    <script>
+        // Hampton Blue Pools Configuration
+        const chatbotConfig = {
+            // Business Information
+            businessName: 'Hampton Blue Pools',
+            location: 'The Hamptons, NY',
+            services: 'Pool & Spa Maintenance, Seasonal Services, Equipment Installation, Eco-Friendly Systems',
+            experience: '25+ years of family-owned pool service experience',
+            specialties: 'Eco-friendly systems, same-day service, competitive pricing, local expertise',
+            serviceAreas: 'The Hamptons, Southampton, Westhampton, Suffolk County',
+            industry: 'pool and spa services',
+            phone: '(631) 555-POOL',
+            email: 'info@hamptonbluepools.com',
+            website: 'https://hamptonbluepools.com',
+            
+            // Custom Questions (5 W's)
+            whereQuestion: 'What area in the Hamptons are you located?',
+            whereInfo: 'We serve The Hamptons, Southampton, Westhampton, and all of Suffolk County',
+            whenQuestion: 'When do you need pool service?',
+            whenInfo: 'We offer flexible scheduling and same-day service for urgent needs',
+            whatQuestion: 'What pool or spa services do you need?',
+            whatInfo: 'We offer maintenance, seasonal openings/closings, equipment installation, and eco-friendly systems',
+            whyQuestion: 'What specific pool challenges are you facing?',
+            whyInfo: 'We specialize in eco-friendly solutions, equipment repairs, and maintaining crystal-clear water',
+            whoQuestion: 'How would you prefer we contact you?',
+            whoInfo: 'We can reach out via phone, email, or text - whatever works best for you',
+            
+            // API Keys (Keep secure in production)
+            geminiApiKey: 'AIzaSyDB4_JVNACxlh0fu3a3UWm9XO5kIxvwDfg',
+            firebaseConfig: {
+                apiKey: "AIzaSyBqXXwSIuWvEbZpiKQNi7oZPuMXCXJ7vvo",
+                authDomain: "chatbot-d3c00.firebaseapp.com",
+                projectId: "chatbot-d3c00",
+                storageBucket: "chatbot-d3c00.firebasestorage.app",
+                messagingSenderId: "249683980392",
+                appId: "1:249683980392:web:b4ff8908c64e59f65d4bdd"
+            }
+        };
+        
+        // Initialize WWWWW.AI Chatbot
+        let chatbot;
+        document.addEventListener('DOMContentLoaded', function() {
+            // Update UI with business info
+            if (chatbotConfig.businessName !== 'Your Business Name') {
+                document.getElementById('businessName').textContent = chatbotConfig.businessName;
+                document.getElementById('businessTagline').textContent = `${chatbotConfig.services} - ${chatbotConfig.location}`;
+                document.title = `${chatbotConfig.businessName} - AI Assistant`;
+            }
+            
+            // Initialize chatbot with configuration
+            chatbot = new WWWWWAIChatbot(chatbotConfig);
+        });
+    </script>
+</body>
+</html>
