@@ -2,10 +2,11 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Globe, Sparkles, Check, Copy } from "lucide-react";
+import { Loader2, Globe, Sparkles, Check, Copy, Plus, Wand2 } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -20,6 +21,13 @@ export default function WebsiteAnalyzer({ onChatbotCreated }: WebsiteAnalyzerPro
   const [analysis, setAnalysis] = useState<any>(null);
   const [config, setConfig] = useState<any>(null);
   const [chatbotName, setChatbotName] = useState("");
+  
+  // Manual creation state
+  const [manualName, setManualName] = useState("");
+  const [manualCompany, setManualCompany] = useState("");
+  const [manualEthos, setManualEthos] = useState("");
+  const [manualKnowledgeBase, setManualKnowledgeBase] = useState("");
+  
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -59,11 +67,15 @@ export default function WebsiteAnalyzer({ onChatbotCreated }: WebsiteAnalyzerPro
         description: "Your AI chatbot is ready to deploy."
       });
       
-      // Reset form
+      // Reset forms
       setWebsiteUrl("");
       setAnalysis(null);
       setConfig(null);
       setChatbotName("");
+      setManualName("");
+      setManualCompany("");
+      setManualEthos("");
+      setManualKnowledgeBase("");
     }
   });
 
@@ -120,17 +132,109 @@ export default function WebsiteAnalyzer({ onChatbotCreated }: WebsiteAnalyzerPro
     });
   };
 
+  const handleCreateManualChatbot = () => {
+    if (!manualName.trim() || !manualCompany.trim() || !manualEthos.trim()) {
+      toast({
+        title: "Missing required fields",
+        description: "Please fill in all required fields to create your chatbot.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Create default config for manual chatbot
+    const manualConfig = {
+      company: {
+        name: manualCompany,
+        ethos: manualEthos,
+        website: "",
+        knowledgeBase: manualKnowledgeBase || "General business information and customer support."
+      },
+      topics: {
+        why: {
+          question: "What brings you here today? What are you hoping to achieve?",
+          completed: false
+        },
+        what: {
+          question: "What specific products or services are you interested in?",
+          completed: false
+        },
+        when: {
+          question: "What's your timeline for making a decision?",
+          completed: false
+        },
+        where: {
+          question: "Where are you located or where would you need service?",
+          completed: false
+        },
+        who: {
+          question: "Who would be involved in making this decision?",
+          completed: false
+        }
+      },
+      ui: {
+        size: "medium",
+        position: "bottom-right",
+        transparentBackground: false,
+        scrollMode: false,
+        entryAnimation: "slide-up",
+        typingIndicator: "dots",
+        autoStartTrigger: "page-load",
+        theme: {
+          primaryColor: "#3b82f6",
+          secondaryColor: "#1e40af",
+          backgroundColor: "#ffffff",
+          textColor: "#111827",
+          borderRadius: 8
+        }
+      },
+      ai: {
+        initialModel: "gemini-2.5-flash",
+        followUpModel: "gemini-2.5-flash",
+        ethosFilter: manualEthos
+      },
+      popupTrigger: {
+        enabled: true,
+        message: `Hello! I'm here to help you learn more about ${manualCompany}. What brings you here today?`,
+        delay: 5
+      }
+    };
+
+    const chatbotData = {
+      userId: "demo-user-1",
+      name: manualName,
+      domain: "",
+      config: manualConfig,
+      isActive: true
+    };
+
+    createChatbotMutation.mutate(chatbotData);
+  };
+
   return (
     <div className="space-y-6">
-      {/* Website Input */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Globe className="w-5 h-5" />
-            <span>Create Chatbot from Website</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+      <Tabs defaultValue="ai" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="ai" className="flex items-center space-x-2">
+            <Wand2 className="w-4 h-4" />
+            <span>AI Analysis</span>
+          </TabsTrigger>
+          <TabsTrigger value="manual" className="flex items-center space-x-2">
+            <Plus className="w-4 h-4" />
+            <span>Manual Setup</span>
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="ai" className="space-y-6">
+          {/* Website Input */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Globe className="w-5 h-5" />
+                <span>Create Chatbot from Website</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="website-url">Website URL</Label>
             <div className="flex space-x-2">
@@ -296,6 +400,81 @@ export default function WebsiteAnalyzer({ onChatbotCreated }: WebsiteAnalyzerPro
           </CardContent>
         </Card>
       )}
+        </TabsContent>
+
+        <TabsContent value="manual" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Plus className="w-5 h-5" />
+                <span>Create Chatbot Manually</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="manual-name">Chatbot Name *</Label>
+                  <Input
+                    id="manual-name"
+                    value={manualName}
+                    onChange={(e) => setManualName(e.target.value)}
+                    placeholder="Enter chatbot name"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="manual-company">Company Name *</Label>
+                  <Input
+                    id="manual-company"
+                    value={manualCompany}
+                    onChange={(e) => setManualCompany(e.target.value)}
+                    placeholder="Enter company name"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="manual-ethos">Company Ethos/Values *</Label>
+                <Textarea
+                  id="manual-ethos"
+                  value={manualEthos}
+                  onChange={(e) => setManualEthos(e.target.value)}
+                  placeholder="Describe your company's values, mission, and what makes you unique..."
+                  className="min-h-24 resize-none"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="manual-knowledge">Knowledge Base (Optional)</Label>
+                <Textarea
+                  id="manual-knowledge"
+                  value={manualKnowledgeBase}
+                  onChange={(e) => setManualKnowledgeBase(e.target.value)}
+                  placeholder="Provide information about your products, services, pricing, locations, etc..."
+                  className="min-h-32 resize-none"
+                />
+              </div>
+
+              <Button
+                onClick={handleCreateManualChatbot}
+                disabled={!manualName.trim() || !manualCompany.trim() || !manualEthos.trim() || createChatbotMutation.isPending}
+                className="w-full bg-blue-600 hover:bg-blue-700"
+              >
+                {createChatbotMutation.isPending ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create Manual Chatbot
+                  </>
+                )}
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
