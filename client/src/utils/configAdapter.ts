@@ -14,11 +14,13 @@ export function adaptChatbotConfig(chatbot: Chatbot) {
     email: '',
     website: `https://${chatbot.domain || 'example.com'}`,
     ui: {
+      size: chatbot.config.ui?.size || 'medium',
       theme: {
         primaryColor: chatbot.config.ui?.theme?.primaryColor || '#3b82f6',
         secondaryColor: chatbot.config.ui?.theme?.secondaryColor || '#8b5cf6',
         textColor: chatbot.config.ui?.theme?.textColor || '#1f2937',
         backgroundColor: chatbot.config.ui?.theme?.backgroundColor || '#ffffff',
+        borderRadius: chatbot.config.ui?.theme?.borderRadius || 12,
       },
       position: chatbot.config.ui?.position || 'bottom-right',
       animation: chatbot.config.ui?.entryAnimation || 'slide-up',

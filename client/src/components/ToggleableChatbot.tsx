@@ -9,8 +9,13 @@ interface ChatbotConfig {
   services?: string;
   location?: string;
   ui?: {
+    size?: 'small' | 'medium' | 'large' | 'fullscreen';
     theme?: {
       primaryColor?: string;
+      secondaryColor?: string;
+      textColor?: string;
+      backgroundColor?: string;
+      borderRadius?: number;
     };
   };
 }
@@ -93,16 +98,31 @@ export function ToggleableChatbot({
     }
   };
 
+  // Get widget dimensions based on size configuration
+  const getWidgetDimensions = () => {
+    const size = config.ui?.size || 'medium';
+    switch (size) {
+      case 'small':
+        return isMinimized ? 'w-80 h-16' : 'w-80 h-[450px]';
+      case 'medium':
+        return isMinimized ? 'w-80 h-16' : 'w-96 h-[600px]';
+      case 'large':
+        return isMinimized ? 'w-80 h-16' : 'w-[450px] h-[700px]';
+      case 'fullscreen':
+        return isMinimized ? 'w-80 h-16' : 'w-screen h-screen fixed inset-0';
+      default:
+        return isMinimized ? 'w-80 h-16' : 'w-96 h-[600px]';
+    }
+  };
+
   return (
     <div className={`${positionClasses[position]} ${className}`}>
       {/* Chat Widget */}
       {isOpen && (
         <Card className={`
           transition-all duration-300 ease-in-out
-          ${isMinimized 
-            ? 'w-80 h-16' 
-            : 'w-96 h-[600px] max-h-[80vh]'
-          }
+          ${getWidgetDimensions()}
+          ${config.ui?.size !== 'fullscreen' ? 'max-h-[80vh]' : ''}
           shadow-2xl border-0 ring-1 ring-gray-200
           animate-in slide-in-from-bottom-2
         `}>
@@ -174,7 +194,18 @@ export function ToggleableChatbot({
                   phone: '',
                   email: '',
                   website: '',
-                  ui: config.ui || { theme: { primaryColor: '#3b82f6' } },
+                  ui: {
+                    theme: {
+                      primaryColor: config.ui?.theme?.primaryColor || '#3b82f6',
+                      secondaryColor: config.ui?.theme?.secondaryColor || '#8b5cf6',
+                      textColor: config.ui?.theme?.textColor || '#1f2937',
+                      backgroundColor: config.ui?.theme?.backgroundColor || '#ffffff',
+                    },
+                    position: 'bottom-right',
+                    animation: 'slide-up',
+                    showTabs: true,
+                    autoStart: false,
+                  },
                   conversation: {
                     topics: [],
                     flow: '5W' as const,
