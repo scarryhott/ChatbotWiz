@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Bot, X, Send, Check, Clock, Circle, MessageSquare, HelpCircle, Target, Package, MapPin, Phone } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+// Removed unused apiRequest import
 import type { Chatbot } from "@shared/schema";
 
 interface ConversationMessage {
@@ -257,11 +257,15 @@ export default function AdvancedChatbot({ chatbot, onLeadUpdate }: AdvancedChatb
   // Chat mutation for API calls
   const chatMutation = useMutation({
     mutationFn: async (data: { message: string; topic: string; history: ConversationMessage[] }) => {
-      const response = await apiRequest('POST', '/api/chat', {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
         message: data.message,
         chatbotId: chatbot.id,
-        currentTopic: data.topic,
-        conversationHistory: data.history
+          currentTopic: data.topic,
+          conversationHistory: data.history
+        })
       });
       return await response.json();
     },

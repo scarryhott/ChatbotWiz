@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Bot, X, Send, Check, Clock, Circle, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+// Removed unused apiRequest import
 import type { Chatbot, ConversationMessage, FiveWProgress } from "@shared/schema";
 
 interface WorkingChatbotProps {
@@ -73,11 +73,15 @@ export default function WorkingChatbot({ chatbot, onLeadUpdate }: WorkingChatbot
 
   const chatMutation = useMutation({
     mutationFn: async (data: { message: string; topic: string; history: ConversationMessage[] }) => {
-      const response = await apiRequest('POST', '/api/chat', {
-        message: data.message,
-        chatbotId: chatbot.id,
-        currentTopic: data.topic,
-        conversationHistory: data.history
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: data.message,
+          chatbotId: chatbot.id,
+          currentTopic: data.topic,
+          conversationHistory: data.history
+        })
       });
       return await response.json();
     },
@@ -118,8 +122,9 @@ export default function WorkingChatbot({ chatbot, onLeadUpdate }: WorkingChatbot
 
   const createLeadMutation = useMutation({
     mutationFn: async (data: any) => {
-      return apiRequest(`/api/chatbots/${chatbot.id}/leads`, {
+      return fetch(`/api/chatbots/${chatbot.id}/leads`, {
         method: "POST",
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       });
     },

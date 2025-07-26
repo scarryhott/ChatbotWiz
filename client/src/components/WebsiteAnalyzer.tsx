@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Globe, Sparkles, Check, Copy, Plus, Wand2 } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+// Removed unused apiRequest import
 import { useToast } from "@/hooks/use-toast";
 import type { Chatbot } from "@shared/schema";
 
@@ -33,7 +33,11 @@ export default function WebsiteAnalyzer({ onChatbotCreated }: WebsiteAnalyzerPro
 
   const analyzeMutation = useMutation({
     mutationFn: async (url: string) => {
-      const response = await apiRequest('POST', '/api/analyze-website', { url });
+      const response = await fetch('/api/analyze-website', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url })
+      });
       return await response.json();
     },
     onSuccess: (data) => {
@@ -56,7 +60,11 @@ export default function WebsiteAnalyzer({ onChatbotCreated }: WebsiteAnalyzerPro
 
   const createChatbotMutation = useMutation({
     mutationFn: async (data: any) => {
-      const response = await apiRequest('POST', '/api/chatbots', data);
+      const response = await fetch('/api/chatbots', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
       return await response.json();
     },
     onSuccess: (chatbot) => {
