@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -46,6 +46,18 @@ export default function EnhancedUICustomization({ chatbot }: EnhancedUICustomiza
     }
   }));
 
+  // Update local state when chatbot prop changes (after save)
+  useEffect(() => {
+    setUIConfig({
+      ...defaultUIConfig,
+      ...chatbot.config.ui,
+      theme: {
+        ...defaultUIConfig.theme,
+        ...chatbot.config.ui?.theme,
+      }
+    });
+  }, [chatbot.config.ui]);
+
   const [previewMode, setPreviewMode] = useState<'desktop' | 'mobile'>('desktop');
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -58,7 +70,9 @@ export default function EnhancedUICustomization({ chatbot }: EnhancedUICustomiza
         body: JSON.stringify(data)
       }),
     onSuccess: () => {
+      // Invalidate both the list and individual chatbot queries
       queryClient.invalidateQueries({ queryKey: ['/api/chatbots'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/chatbots', chatbot.id] });
       toast({
         title: 'Success',
         description: 'UI customization updated successfully',
