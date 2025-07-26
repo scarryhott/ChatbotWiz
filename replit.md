@@ -19,6 +19,8 @@ This is a full-stack TypeScript application for an AI-powered chatbot creation a
 ✓ **Integrated Widget Theming** - Chatbot widget dynamically applies user-customized colors, border radius, and animations
 ✓ **Custom Questions System** - Users can customize all 5W topic questions with visual icons and descriptions
 ✓ **Responsive Widget Sizing** - Widget dimensions now scale proportionally to screen size using viewport units (vw/vh) instead of fixed pixels
+✓ **Fullscreen Preview Mode** - Added expandable fullscreen preview with exit functionality for better widget testing
+✓ **Preview-Proportional Sizing** - Widget sizes in preview mode are proportional to preview container dimensions
 
 ## User Preferences
 

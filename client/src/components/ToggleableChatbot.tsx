@@ -27,6 +27,7 @@ interface ToggleableChatbotProps {
   position?: 'bottom-right' | 'bottom-left' | 'center';
   autoOpen?: boolean;
   className?: string;
+  previewMode?: 'desktop' | 'mobile' | 'fullscreen';
 }
 
 export function ToggleableChatbot({
@@ -35,7 +36,8 @@ export function ToggleableChatbot({
   onConversationUpdate,
   position = 'bottom-right',
   autoOpen = false,
-  className = ''
+  className = '',
+  previewMode = 'desktop'
 }: ToggleableChatbotProps) {
   const [isOpen, setIsOpen] = useState(autoOpen);
   const [isMinimized, setIsMinimized] = useState(false);
@@ -98,24 +100,41 @@ export function ToggleableChatbot({
     }
   };
 
-  // Get widget dimensions based on size configuration (responsive to screen size)
+  // Get widget dimensions based on size configuration (proportional to preview or screen)
   const getWidgetDimensions = () => {
     const size = config.ui?.size || 'medium';
     if (isMinimized) {
       return 'w-80 h-16'; // Minimized state stays consistent
     }
     
+    // If in fullscreen preview mode, use screen dimensions
+    if (previewMode === 'fullscreen') {
+      switch (size) {
+        case 'small':
+          return 'w-[min(90vw,320px)] h-[min(70vh,450px)]';
+        case 'medium':
+          return 'w-[min(90vw,380px)] h-[min(80vh,600px)]';
+        case 'large':
+          return 'w-[min(95vw,450px)] h-[min(85vh,700px)]';
+        case 'fullscreen':
+          return 'w-screen h-screen fixed inset-0';
+        default:
+          return 'w-[min(90vw,380px)] h-[min(80vh,600px)]';
+      }
+    }
+    
+    // For preview mode, use proportional sizing to the preview container
     switch (size) {
       case 'small':
-        return 'w-[min(90vw,320px)] h-[min(70vh,450px)]';
+        return previewMode === 'mobile' ? 'w-20 h-28' : 'w-32 h-40';
       case 'medium':
-        return 'w-[min(90vw,380px)] h-[min(80vh,600px)]';
+        return previewMode === 'mobile' ? 'w-24 h-32' : 'w-40 h-48';
       case 'large':
-        return 'w-[min(95vw,450px)] h-[min(85vh,700px)]';
+        return previewMode === 'mobile' ? 'w-28 h-36' : 'w-48 h-56';
       case 'fullscreen':
-        return 'w-screen h-screen fixed inset-0';
+        return 'w-full h-full';
       default:
-        return 'w-[min(90vw,380px)] h-[min(80vh,600px)]';
+        return previewMode === 'mobile' ? 'w-24 h-32' : 'w-40 h-48';
     }
   };
 

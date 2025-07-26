@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Palette, Layout, Settings, Eye, Save, RotateCcw, Monitor, Smartphone } from 'lucide-react';
+import { Palette, Layout, Settings, Eye, Save, RotateCcw, Monitor, Smartphone, Maximize2, Minimize2, X } from 'lucide-react';
 import { ToggleableChatbot } from './ToggleableChatbot';
 import { adaptChatbotConfig } from '@/utils/configAdapter';
 import type { Chatbot } from '@shared/schema';
@@ -59,6 +59,7 @@ export default function EnhancedUICustomization({ chatbot }: EnhancedUICustomiza
   }, [chatbot.config.ui]);
 
   const [previewMode, setPreviewMode] = useState<'desktop' | 'mobile'>('desktop');
+  const [isFullscreenPreview, setIsFullscreenPreview] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -265,9 +266,9 @@ export default function EnhancedUICustomization({ chatbot }: EnhancedUICustomiza
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="small">Small (90% width, 70% height)</SelectItem>
-                        <SelectItem value="medium">Medium (90% width, 80% height)</SelectItem>
-                        <SelectItem value="large">Large (95% width, 85% height)</SelectItem>
+                        <SelectItem value="small">Small (30% of preview)</SelectItem>
+                        <SelectItem value="medium">Medium (40% of preview)</SelectItem>
+                        <SelectItem value="large">Large (50% of preview)</SelectItem>
                         <SelectItem value="fullscreen">Full Screen</SelectItem>
                       </SelectContent>
                     </Select>
@@ -410,10 +411,21 @@ export default function EnhancedUICustomization({ chatbot }: EnhancedUICustomiza
 
         {/* Live Preview */}
         <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <Eye size={16} />
-            <h4 className="font-medium">Live Preview</h4>
-            <span className="text-sm text-gray-500">({previewMode})</span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Eye size={16} />
+              <h4 className="font-medium">Live Preview</h4>
+              <span className="text-sm text-gray-500">({previewMode})</span>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsFullscreenPreview(true)}
+              className="flex items-center gap-2"
+            >
+              <Maximize2 size={16} />
+              Fullscreen
+            </Button>
           </div>
           
           <Card className="relative overflow-hidden bg-gray-50">
@@ -435,6 +447,7 @@ export default function EnhancedUICustomization({ chatbot }: EnhancedUICustomiza
                   position={uiConfig.position as any}
                   autoOpen={false}
                   className="relative"
+                  previewMode={previewMode}
                 />
                 
                 {previewMode === 'desktop' && (
@@ -447,6 +460,39 @@ export default function EnhancedUICustomization({ chatbot }: EnhancedUICustomiza
           </Card>
         </div>
       </div>
+      
+      {/* Fullscreen Preview Modal */}
+      {isFullscreenPreview && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm">
+          <div className="fixed inset-0 bg-gradient-to-br from-blue-50 to-purple-50">
+            {/* Close Button */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsFullscreenPreview(false)}
+              className="absolute top-4 right-4 z-10 bg-white/90 backdrop-blur-sm flex items-center gap-2"
+            >
+              <X size={16} />
+              Exit Fullscreen
+            </Button>
+            
+            {/* Fullscreen Preview */}
+            <div className="relative w-full h-full overflow-hidden">
+              <ToggleableChatbot
+                config={previewConfig}
+                position={uiConfig.position as any}
+                autoOpen={true}
+                className="relative"
+                previewMode="fullscreen"
+              />
+              
+              <div className="absolute top-4 left-4 text-sm text-gray-600 bg-white/80 backdrop-blur-sm rounded px-3 py-2">
+                Fullscreen Preview - {previewConfig.businessName}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
