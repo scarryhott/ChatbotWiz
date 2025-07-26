@@ -297,18 +297,25 @@ export function EnhancedChatbot({
       // Get AI response
       const aiResponse = await callGeminiAPI(userMessage.content, activeTab);
       
-      // Create bot response
+      // Switch topic FIRST if AI suggests it, then create response in new topic
+      let responseTab = activeTab;
+      if (aiResponse.nextTopic && aiResponse.nextTopic !== activeTab) {
+        responseTab = aiResponse.nextTopic;
+        setActiveTab(aiResponse.nextTopic);
+      }
+      
+      // Create bot response in the correct topic tab
       const botMessage: ConversationMessage = {
         id: generateMessageId(),
         type: 'bot',
         content: aiResponse.response,
         timestamp: new Date().toISOString(),
-        topic: activeTab
+        topic: responseTab
       };
 
       setChatAreaMessages(prev => ({
         ...prev,
-        [activeTab]: [...(prev[activeTab] || []), botMessage]
+        [responseTab]: [...(prev[responseTab] || []), botMessage]
       }));
 
       // Update lead data
@@ -327,18 +334,11 @@ export function EnhancedChatbot({
         onLeadUpdate(updatedLeadData);
       }
 
-      // Use AI-driven topic switching for intelligent conversation flow
-      if (aiResponse.isComplete && aiResponse.nextTopic) {
+      // Mark topic complete if AI suggests it
+      if (aiResponse.isComplete) {
         setTimeout(() => {
           markTopicComplete(activeTab);
-          // Switch to AI-suggested next topic
-          setActiveTab(aiResponse.nextTopic);
         }, 1500);
-      } else if (aiResponse.nextTopic && aiResponse.nextTopic !== activeTab) {
-        // AI suggests topic switch even if current isn't complete
-        setTimeout(() => {
-          setActiveTab(aiResponse.nextTopic);
-        }, 1000);
       }
 
     } catch (error) {
