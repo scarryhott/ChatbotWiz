@@ -18,6 +18,7 @@ This is a full-stack TypeScript application for an AI-powered chatbot creation a
 ✓ **Advanced UI Customization** - Real-time preview with full theme control (colors, animations, positioning, behavior)
 ✓ **Integrated Widget Theming** - Chatbot widget dynamically applies user-customized colors, border radius, and animations
 ✓ **Custom Questions System** - Users can customize all 5W topic questions with visual icons and descriptions
+✓ **Responsive Widget Sizing** - Widget dimensions now scale proportionally to screen size using viewport units (vw/vh) instead of fixed pixels
 
 ## User Preferences
 

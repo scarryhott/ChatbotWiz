@@ -98,20 +98,24 @@ export function ToggleableChatbot({
     }
   };
 
-  // Get widget dimensions based on size configuration
+  // Get widget dimensions based on size configuration (responsive to screen size)
   const getWidgetDimensions = () => {
     const size = config.ui?.size || 'medium';
+    if (isMinimized) {
+      return 'w-80 h-16'; // Minimized state stays consistent
+    }
+    
     switch (size) {
       case 'small':
-        return isMinimized ? 'w-80 h-16' : 'w-80 h-[450px]';
+        return 'w-[min(90vw,320px)] h-[min(70vh,450px)]';
       case 'medium':
-        return isMinimized ? 'w-80 h-16' : 'w-96 h-[600px]';
+        return 'w-[min(90vw,380px)] h-[min(80vh,600px)]';
       case 'large':
-        return isMinimized ? 'w-80 h-16' : 'w-[450px] h-[700px]';
+        return 'w-[min(95vw,450px)] h-[min(85vh,700px)]';
       case 'fullscreen':
-        return isMinimized ? 'w-80 h-16' : 'w-screen h-screen fixed inset-0';
+        return 'w-screen h-screen fixed inset-0';
       default:
-        return isMinimized ? 'w-80 h-16' : 'w-96 h-[600px]';
+        return 'w-[min(90vw,380px)] h-[min(80vh,600px)]';
     }
   };
 

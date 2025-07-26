@@ -41,9 +41,9 @@ export default function UICustomization({ chatbot }: UICustomizationProps) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="small">Small (300x400)</SelectItem>
-                  <SelectItem value="medium">Medium (350x500)</SelectItem>
-                  <SelectItem value="large">Large (400x600)</SelectItem>
+                  <SelectItem value="small">Small (90% width, 70% height)</SelectItem>
+                  <SelectItem value="medium">Medium (90% width, 80% height)</SelectItem>
+                  <SelectItem value="large">Large (95% width, 85% height)</SelectItem>
                   <SelectItem value="fullscreen">Full Screen</SelectItem>
                 </SelectContent>
               </Select>

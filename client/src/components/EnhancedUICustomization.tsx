@@ -265,9 +265,9 @@ export default function EnhancedUICustomization({ chatbot }: EnhancedUICustomiza
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="small">Small (320x450)</SelectItem>
-                        <SelectItem value="medium">Medium (380x600)</SelectItem>
-                        <SelectItem value="large">Large (450x700)</SelectItem>
+                        <SelectItem value="small">Small (90% width, 70% height)</SelectItem>
+                        <SelectItem value="medium">Medium (90% width, 80% height)</SelectItem>
+                        <SelectItem value="large">Large (95% width, 85% height)</SelectItem>
                         <SelectItem value="fullscreen">Full Screen</SelectItem>
                       </SelectContent>
                     </Select>
