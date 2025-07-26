@@ -350,18 +350,7 @@ export function EnhancedChatbot({
 
   const markTopicComplete = (topicId: string) => {
     setCompletedTopics(prev => new Set(Array.from(prev).concat([topicId])));
-    
-    // Move to next topic in sequence
-    const currentIndex = topics.findIndex(t => t.id === topicId);
-    const nextIndex = (currentIndex + 1) % topics.length;
-    const nextTopic = topics[nextIndex];
-    
-    const completedArray = Array.from(completedTopics);
-    if (!completedArray.includes(nextTopic.id)) {
-      setTimeout(() => {
-        askTopicQuestion(nextTopic.id);
-      }, 1500);
-    }
+    // Let AI handle topic progression naturally - no automatic next topic questions
   };
 
   const handleTabClick = (topicId: string) => {
