@@ -9,7 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import { MessageCircle, HelpCircle, MapPin, Calendar, Users, Save, RotateCcw } from 'lucide-react';
 import type { Chatbot } from '@shared/schema';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiRequest } from '@/lib/queryClient';
+// Removed unused apiRequest import
 import { useToast } from '@/hooks/use-toast';
 
 interface FiveWSetupProps {
@@ -50,7 +50,11 @@ export default function FiveWSetup({ chatbot }: FiveWSetupProps) {
 
   const updateChatbotMutation = useMutation({
     mutationFn: (data: Partial<Chatbot>) => 
-      apiRequest(`/api/chatbots/${chatbot.id}`, 'PATCH', data),
+      fetch(`/api/chatbots/${chatbot.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/chatbots'] });
       toast({
