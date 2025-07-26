@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import FiveWFlow from "./FiveWFlow";
-import UICustomization from "./UICustomization";
+import FiveWSetup from "./FiveWSetup";
+import EnhancedUICustomization from "./EnhancedUICustomization";
 import type { Chatbot } from "@shared/schema";
 
 interface ConfigurationTabsProps {
@@ -53,11 +53,11 @@ export default function ConfigurationTabs({ chatbot }: ConfigurationTabsProps) {
         </div>
 
         <TabsContent value="5w-flow" className="p-6">
-          <FiveWFlow chatbot={chatbot} />
+          <FiveWSetup chatbot={chatbot} />
         </TabsContent>
 
         <TabsContent value="ui-customization" className="p-6">
-          <UICustomization chatbot={chatbot} />
+          <EnhancedUICustomization chatbot={chatbot} />
         </TabsContent>
 
         <TabsContent value="ai-settings" className="p-6">

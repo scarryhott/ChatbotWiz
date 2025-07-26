@@ -107,7 +107,14 @@ export function ToggleableChatbot({
           animate-in slide-in-from-bottom-2
         `}>
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-lg">
+          <div 
+            className="flex items-center justify-between p-4 border-b text-white rounded-t-lg"
+            style={{
+              background: `linear-gradient(135deg, ${config.ui?.theme?.primaryColor || '#3b82f6'}, ${config.ui?.theme?.secondaryColor || config.ui?.theme?.primaryColor || '#8b5cf6'})`,
+              borderTopLeftRadius: `${config.ui?.theme?.borderRadius || 12}px`,
+              borderTopRightRadius: `${config.ui?.theme?.borderRadius || 12}px`
+            }}
+          >
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
                 <MessageCircle size={16} />

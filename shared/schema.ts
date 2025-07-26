@@ -60,6 +60,17 @@ export interface ChatbotConfig {
     where: { question: string; completed: boolean; value?: string };
     who: { question: string; completed: boolean; value?: string };
   };
+  conversation: {
+    customQuestions: {
+      WHY: string;
+      WHAT: string;
+      WHERE: string;
+      WHEN: string;
+      WHO: string;
+    };
+    flow: '5W' | 'linear' | 'custom';
+    maxFollowUps: number;
+  };
   ui: {
     size: "small" | "medium" | "large" | "fullscreen";
     position: "bottom-right" | "bottom-left" | "center" | "custom";

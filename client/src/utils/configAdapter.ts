@@ -15,59 +15,59 @@ export function adaptChatbotConfig(chatbot: Chatbot) {
     website: `https://${chatbot.domain || 'example.com'}`,
     ui: {
       theme: {
-        primaryColor: chatbot.config.ui.theme.primaryColor,
-        secondaryColor: chatbot.config.ui.theme.secondaryColor,
-        textColor: chatbot.config.ui.theme.textColor,
-        backgroundColor: chatbot.config.ui.theme.backgroundColor,
+        primaryColor: chatbot.config.ui?.theme?.primaryColor || '#3b82f6',
+        secondaryColor: chatbot.config.ui?.theme?.secondaryColor || '#8b5cf6',
+        textColor: chatbot.config.ui?.theme?.textColor || '#1f2937',
+        backgroundColor: chatbot.config.ui?.theme?.backgroundColor || '#ffffff',
       },
-      position: chatbot.config.ui.position,
-      animation: chatbot.config.ui.entryAnimation,
+      position: chatbot.config.ui?.position || 'bottom-right',
+      animation: chatbot.config.ui?.entryAnimation || 'slide-up',
       showTabs: true,
-      autoStart: true,
+      autoStart: chatbot.config.ui?.autoStartTrigger !== 'manual',
     },
     conversation: {
       topics: [
         {
-          id: 'WHO',
-          title: 'Contact Info',
-          question: 'How would you prefer we contact you?',
-          info: 'We can reach out via phone, email, or text - whatever works best for you.',
-          icon: '👤'
-        },
-        {
-          id: 'WHAT',
-          title: 'Service Needed',
-          question: 'What services do you need?',
-          info: 'We offer professional services to meet your needs.',
-          icon: '🔧'
-        },
-        {
           id: 'WHY',
           title: 'Your Needs',
-          question: 'What specific challenges are you facing?',
+          question: chatbot.config.conversation?.customQuestions?.WHY || 'What brings you here today? How can we help you?',
           info: 'We specialize in providing exceptional service and solutions.',
           icon: '💡'
         },
         {
+          id: 'WHAT',
+          title: 'Service Needed',
+          question: chatbot.config.conversation?.customQuestions?.WHAT || 'What specific services or solutions are you looking for?',
+          info: 'We offer professional services to meet your needs.',
+          icon: '🔧'
+        },
+        {
           id: 'WHERE',
           title: 'Location',
-          question: 'What area are you located in?',
+          question: chatbot.config.conversation?.customQuestions?.WHERE || 'What area do you need service in? Where are you located?',
           info: 'We serve the local area and surrounding regions.',
           icon: '📍'
         },
         {
           id: 'WHEN',
           title: 'Timing',
-          question: 'When do you need service?',
+          question: chatbot.config.conversation?.customQuestions?.WHEN || 'When do you need this service? What\'s your timeline?',
           info: 'We offer flexible scheduling to meet your needs.',
           icon: '⏰'
+        },
+        {
+          id: 'WHO',
+          title: 'Contact Info',
+          question: chatbot.config.conversation?.customQuestions?.WHO || 'How would you like us to contact you? What\'s the best way to reach you?',
+          info: 'We can reach out via phone, email, or text - whatever works best for you.',
+          icon: '👤'
         }
       ],
       flow: '5W',
       maxFollowUps: 3,
     },
     ai: {
-      model: chatbot.config.ai.initialModel,
+      model: chatbot.config.ai?.initialModel || 'gemini-2.5-flash',
       provider: 'gemini',
       maxTokens: 500,
     },
