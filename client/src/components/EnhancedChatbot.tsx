@@ -191,7 +191,7 @@ export function EnhancedChatbot({
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatAreaMessages, activeTab]);
 
-  // Initialize conversation
+  // Initialize conversation with helpful welcome only
   useEffect(() => {
     if (config.ui.autoStart) {
       setTimeout(() => {
@@ -212,13 +212,14 @@ export function EnhancedChatbot({
     const welcomeMessage: ConversationMessage = {
       id: generateMessageId(),
       type: 'bot',
-      content: `Hi! I'm the ${businessInfo.name} assistant. I'm here to learn about your ${businessInfo.industry} needs and connect you with our team. Let's start with understanding what brings you here today.`,
+      content: `Hi! I'm here to help with ${businessInfo.services} in ${businessInfo.serviceAreas}. Whether you're looking for ${businessInfo.specialties} or have questions about our services, I'm here to assist. What can I help you with today?`,
       timestamp: new Date().toISOString(),
       topic: 'WHY',
       quickReplies: [
-        'I need service information',
-        'I have a specific problem',
-        'I want to learn more about your company'
+        'Tell me about your services',
+        'I have a specific need',
+        'What areas do you serve?',
+        'How can you help me?'
       ]
     };
 
@@ -227,31 +228,10 @@ export function EnhancedChatbot({
       'WHY': [welcomeMessage]
     }));
 
-    // Ask the first topic question
-    setTimeout(() => {
-      askTopicQuestion('WHY');
-    }, 1500);
+    // Don't ask questions immediately - let user lead the conversation
   }, [businessInfo]);
 
-  const askTopicQuestion = useCallback((topicId: string) => {
-    const topic = topics.find(t => t.id === topicId);
-    if (!topic) return;
-
-    const questionMessage: ConversationMessage = {
-      id: generateMessageId(),
-      type: 'bot',
-      content: topic.question,
-      timestamp: new Date().toISOString(),
-      topic: topicId
-    };
-
-    setChatAreaMessages(prev => ({
-      ...prev,
-      [topicId]: [...(prev[topicId] || []), questionMessage]
-    }));
-
-    setActiveTab(topicId);
-  }, [topics]);
+  // Remove rigid topic questioning - let AI handle conversation flow naturally
 
   const callGeminiAPI = async (userMessage: string, topic: string): Promise<{ response: string; nextTopic?: string; isComplete?: boolean }> => {
     try {
@@ -347,23 +327,18 @@ export function EnhancedChatbot({
         onLeadUpdate(updatedLeadData);
       }
 
-      // Check if AI suggested topic completion or auto-advance
+      // Use AI-driven topic switching for intelligent conversation flow
       if (aiResponse.isComplete && aiResponse.nextTopic) {
         setTimeout(() => {
           markTopicComplete(activeTab);
-          if (aiResponse.nextTopic) {
-            askTopicQuestion(aiResponse.nextTopic);
-          }
-        }, 2000);
-      } else {
-        // Fallback: Check if topic should be marked complete and move to next
+          // Switch to AI-suggested next topic
+          setActiveTab(aiResponse.nextTopic);
+        }, 1500);
+      } else if (aiResponse.nextTopic && aiResponse.nextTopic !== activeTab) {
+        // AI suggests topic switch even if current isn't complete
         setTimeout(() => {
-          const currentTabMessages = (chatAreaMessages[activeTab] || []).length;
-          const completedArray = Array.from(completedTopics);
-          if (currentTabMessages >= 6 && !completedArray.includes(activeTab)) {
-            markTopicComplete(activeTab);
-          }
-        }, 3000);
+          setActiveTab(aiResponse.nextTopic);
+        }, 1000);
       }
 
     } catch (error) {
