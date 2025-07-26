@@ -62,6 +62,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Chat response API for real-time AI responses
+  app.post("/api/chat/response", async (req, res) => {
+    try {
+      const { message, topic, businessInfo, conversationHistory } = req.body;
+      
+      const response = await generateChatResponse({
+        userMessage: message,
+        currentTopic: topic,
+        businessInfo: businessInfo,
+        conversationHistory: conversationHistory || []
+      });
+      
+      res.json({ message: response.message, nextTopic: response.nextTopic, isTopicComplete: response.isTopicComplete });
+    } catch (error) {
+      console.error('Chat response error:', error);
+      res.status(500).json({ message: "I apologize, but I'm having trouble processing your request right now. How can I help you today?" });
+    }
+  });
+
   // Lead routes
   app.get("/api/chatbots/:chatbotId/leads", async (req, res) => {
     try {
@@ -133,12 +152,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Chatbot not found" });
       }
 
-      const response = await generateChatResponse(
-        message,
-        chatbot.config,
-        currentTopic,
-        conversationHistory || []
-      );
+      const response = await generateChatResponse({
+        userMessage: message,
+        currentTopic: currentTopic,
+        businessInfo: { name: chatbot.name, ...chatbot.config },
+        conversationHistory: conversationHistory || []
+      });
 
       res.json(response);
     } catch (error) {

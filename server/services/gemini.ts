@@ -173,7 +173,105 @@ Create a JSON response with this structure:
   }
 }
 
-export async function generateChatResponse(
+export async function generateChatResponse(params: {
+  userMessage: string;
+  currentTopic: string;
+  businessInfo: any;
+  conversationHistory: any[];
+}): Promise<ChatResponse> {
+  const { userMessage, currentTopic, businessInfo, conversationHistory } = params;
+  
+  try {
+    const systemPrompt = `You are an AI assistant for ${businessInfo.businessName || businessInfo.name}, a professional service business.
+    
+Business Context:
+- Company: ${businessInfo.businessName || businessInfo.name}
+- Services: ${businessInfo.services}
+- Service Areas: ${businessInfo.serviceAreas || businessInfo.location}
+- Experience: ${businessInfo.experience}
+- Industry: ${businessInfo.industry}
+
+Current 5W Topic: ${currentTopic}
+
+5W Framework Guidelines:
+- WHY: Understand their motivation, problem, or need
+- WHAT: Identify specific services or solutions needed
+- WHERE: Determine location and scope
+- WHEN: Establish timeline and urgency
+- WHO: Collect contact information
+
+Conversation Rules:
+1. Keep responses concise (2-3 sentences)
+2. Stay focused on the current topic: ${currentTopic}
+3. Ask relevant follow-up questions
+4. Use a professional, helpful tone
+5. Guide the conversation naturally through the 5W flow
+6. If user answers questions from other topics, acknowledge but guide back to current topic
+7. Determine if topic is complete and suggest next topic when appropriate
+
+Respond with natural, conversational language that matches the business tone.`;
+
+    const conversationContext = conversationHistory.slice(-6).map((msg: any) => 
+      `${msg.type}: ${msg.content}`
+    ).join('\n');
+
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      config: {
+        systemInstruction: systemPrompt,
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: "object",
+          properties: {
+            message: { type: "string" },
+            nextTopic: { type: "string", enum: ["WHY", "WHAT", "WHEN", "WHERE", "WHO"] },
+            isTopicComplete: { type: "boolean" },
+            quickReplies: { type: "array", items: { type: "string" } },
+            shouldEndConversation: { type: "boolean" }
+          },
+          required: ["message", "isTopicComplete", "shouldEndConversation"]
+        }
+      },
+      contents: `
+Recent conversation:
+${conversationContext}
+
+Current topic: ${currentTopic}
+User message: ${userMessage}
+
+Generate an appropriate response that:
+1. Addresses the user's message
+2. Stays focused on the ${currentTopic} topic
+3. Asks relevant follow-up questions
+4. Determines if we have enough information about ${currentTopic}
+5. If topic is complete, suggest the next logical topic in the 5W flow
+`
+    });
+
+    const rawJson = response.text;
+    if (rawJson) {
+      const parsedResponse = JSON.parse(rawJson);
+      return {
+        message: parsedResponse.message,
+        nextTopic: parsedResponse.nextTopic,
+        isTopicComplete: parsedResponse.isTopicComplete || false,
+        quickReplies: parsedResponse.quickReplies || [],
+        shouldEndConversation: parsedResponse.shouldEndConversation || false
+      };
+    } else {
+      throw new Error("Empty response from Gemini");
+    }
+  } catch (error) {
+    console.error('Gemini API error:', error);
+    return {
+      message: `I'd be happy to help with your ${currentTopic.toLowerCase()} questions! Could you tell me more about what you're looking for?`,
+      isTopicComplete: false,
+      shouldEndConversation: false
+    };
+  }
+}
+
+export async function generateChatResponseOriginal(
   userMessage: string,
   chatbotConfig: ChatbotConfig,
   currentTopic: "why" | "what" | "when" | "where" | "who",

@@ -1,0 +1,220 @@
+import React, { useState, useEffect } from 'react';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { MessageCircle, X, Minimize2, Maximize2 } from 'lucide-react';
+import { EnhancedChatbot } from './EnhancedChatbot';
+interface ChatbotConfig {
+  businessName?: string;
+  industry?: string;
+  services?: string;
+  location?: string;
+  ui?: {
+    theme?: {
+      primaryColor?: string;
+    };
+  };
+}
+
+interface ToggleableChatbotProps {
+  config: ChatbotConfig;
+  onLeadUpdate?: (leadData: any) => void;
+  onConversationUpdate?: (messages: any[]) => void;
+  position?: 'bottom-right' | 'bottom-left' | 'center';
+  autoOpen?: boolean;
+  className?: string;
+}
+
+export function ToggleableChatbot({
+  config,
+  onLeadUpdate,
+  onConversationUpdate,
+  position = 'bottom-right',
+  autoOpen = false,
+  className = ''
+}: ToggleableChatbotProps) {
+  const [isOpen, setIsOpen] = useState(autoOpen);
+  const [isMinimized, setIsMinimized] = useState(false);
+  const [hasNewMessage, setHasNewMessage] = useState(false);
+
+  const positionClasses = {
+    'bottom-right': 'fixed bottom-4 right-4 z-50',
+    'bottom-left': 'fixed bottom-4 left-4 z-50',
+    'center': 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50'
+  };
+
+  const handleToggle = () => {
+    if (isOpen) {
+      setIsOpen(false);
+      setIsMinimized(false);
+    } else {
+      setIsOpen(true);
+      setIsMinimized(false);
+      setHasNewMessage(false);
+    }
+  };
+
+  const handleMinimize = () => {
+    setIsMinimized(true);
+  };
+
+  const handleMaximize = () => {
+    setIsMinimized(false);
+  };
+
+  const handleClose = () => {
+    setIsOpen(false);
+    setIsMinimized(false);
+  };
+
+  // Auto-open after delay if configured
+  useEffect(() => {
+    if (!autoOpen) return;
+    
+    const timer = setTimeout(() => {
+      setIsOpen(true);
+      setHasNewMessage(true);
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, [autoOpen]);
+
+  // Handle conversation updates to show notification
+  const handleConversationUpdate = (messages: any[]) => {
+    if (onConversationUpdate) {
+      onConversationUpdate(messages);
+    }
+    
+    // Show notification for new bot messages when closed
+    if (!isOpen && messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage?.type === 'bot') {
+        setHasNewMessage(true);
+      }
+    }
+  };
+
+  return (
+    <div className={`${positionClasses[position]} ${className}`}>
+      {/* Chat Widget */}
+      {isOpen && (
+        <Card className={`
+          transition-all duration-300 ease-in-out
+          ${isMinimized 
+            ? 'w-80 h-16' 
+            : 'w-96 h-[600px] max-h-[80vh]'
+          }
+          shadow-2xl border-0 ring-1 ring-gray-200
+          animate-in slide-in-from-bottom-2
+        `}>
+          {/* Header */}
+          <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-lg">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                <MessageCircle size={16} />
+              </div>
+              <div>
+                <h3 className="font-semibold text-sm">
+                  {config.businessName || 'Chat Assistant'}
+                </h3>
+                <p className="text-xs opacity-80">Online now</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-1">
+              {!isMinimized && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleMinimize}
+                  className="text-white hover:bg-white/20 h-8 w-8 p-0"
+                >
+                  <Minimize2 size={14} />
+                </Button>
+              )}
+              {isMinimized && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleMaximize}
+                  className="text-white hover:bg-white/20 h-8 w-8 p-0"
+                >
+                  <Maximize2 size={14} />
+                </Button>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleClose}
+                className="text-white hover:bg-white/20 h-8 w-8 p-0"
+              >
+                <X size={14} />
+              </Button>
+            </div>
+          </div>
+
+          {/* Chat Content */}
+          {!isMinimized && (
+            <div className="h-full flex flex-col">
+              <EnhancedChatbot
+                config={{
+                  businessName: config.businessName || 'Assistant',
+                  location: config.location || 'Local area',
+                  services: config.services || 'Professional services',
+                  experience: 'Experienced professionals',
+                  specialties: 'Quality service',
+                  serviceAreas: config.location || 'Local area',
+                  industry: config.industry || 'service',
+                  phone: '',
+                  email: '',
+                  website: '',
+                  ui: config.ui || { theme: { primaryColor: '#3b82f6' } },
+                  conversation: {
+                    topics: [],
+                    flow: '5W' as const,
+                    maxFollowUps: 3,
+                  },
+                  ai: {
+                    model: 'gemini-2.5-flash',
+                    provider: 'gemini',
+                    maxTokens: 500,
+                  }
+                }}
+                onLeadUpdate={onLeadUpdate}
+                onConversationUpdate={handleConversationUpdate}
+                className="flex-1 border-0 rounded-none"
+              />
+            </div>
+          )}
+        </Card>
+      )}
+
+      {/* Chat Button */}
+      {!isOpen && (
+        <Button
+          onClick={handleToggle}
+          className="
+            w-16 h-16 rounded-full 
+            bg-gradient-to-r from-blue-600 to-purple-600 
+            hover:from-blue-700 hover:to-purple-700
+            shadow-2xl border-0
+            transition-all duration-300 hover:scale-110
+            animate-in slide-in-from-bottom-2
+            relative
+          "
+        >
+          <MessageCircle size={24} className="text-white" />
+          
+          {/* Notification Dot */}
+          {hasNewMessage && (
+            <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
+              <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+            </div>
+          )}
+          
+          {/* Pulse Animation */}
+          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 animate-ping opacity-20" />
+        </Button>
+      )}
+    </div>
+  );
+}

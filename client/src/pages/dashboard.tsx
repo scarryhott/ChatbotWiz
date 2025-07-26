@@ -3,6 +3,7 @@ import Sidebar from "@/components/Sidebar";
 import ConfigurationTabs from "@/components/ConfigurationTabs";
 import AdvancedChatbot from "@/components/AdvancedChatbot";
 import { EnhancedChatbot } from "@/components/EnhancedChatbot";
+import { ToggleableChatbot } from "@/components/ToggleableChatbot";
 import LeadManagement from "@/components/LeadManagement";
 import WebsiteAnalyzer from "@/components/WebsiteAnalyzer";
 import InstallationTab from "@/components/InstallationTab";
@@ -158,9 +159,9 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Enhanced Chatbot - Always visible */}
+        {/* Toggleable Chatbot Widget */}
         {selectedChatbot && (
-          <EnhancedChatbot 
+          <ToggleableChatbot 
             config={adaptChatbotConfig(selectedChatbot)}
             onLeadUpdate={(leadData) => {
               console.log("New lead captured:", leadData);
@@ -169,7 +170,8 @@ export default function Dashboard() {
             onConversationUpdate={(messages) => {
               console.log("Conversation updated:", messages);
             }}
-            className="w-96 h-full"
+            position="bottom-right"
+            autoOpen={false}
           />
         )}
       </div>

@@ -2,7 +2,16 @@
 
 ## Overview
 
-This is a full-stack TypeScript application for an AI-powered chatbot creation and management platform called "wwwwwai". The application allows users to create, configure, and deploy customizable chatbots that use a "5W framework" (Why, What, When, Where, Who) to guide conversations and collect leads. The system features real-time chat capabilities, AI-powered website analysis, and comprehensive lead management.
+This is a full-stack TypeScript application for an AI-powered chatbot creation and management platform called "wwwwwai". The application allows users to create, configure, and deploy customizable chatbots that use a "5W framework" (Why, What, When, Where, Who) to guide conversations and collect leads. The system features real-time chat capabilities, AI-powered website analysis, comprehensive lead management, and a toggleable widget UI for seamless website integration.
+
+## Recent Changes (January 26, 2025)
+
+✓ **Enhanced Gemini AI Integration** - Implemented real-time AI responses with intelligent topic switching
+✓ **Toggleable Widget UI** - Created collapsible chat widget with minimize/maximize functionality  
+✓ **5W Conversation Flow** - Built structured conversation management with visual progress indicators
+✓ **Complete Installation System** - Added embed code generation for multiple platforms (HTML, WordPress, React, Shopify)
+✓ **Configuration Adapter** - Built seamless bridge between database config and chatbot requirements
+✓ **Universal Embed Script** - Generated embeddable JavaScript with customizable positioning and styling
 
 ## User Preferences
 

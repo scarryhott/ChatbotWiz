@@ -253,64 +253,41 @@ export function EnhancedChatbot({
     setActiveTab(topicId);
   }, [topics]);
 
-  const callGeminiAPI = async (userMessage: string, topic: string): Promise<string> => {
+  const callGeminiAPI = async (userMessage: string, topic: string): Promise<{ response: string; nextTopic?: string; isComplete?: boolean }> => {
     try {
       setIsProcessing(true);
       
       const conversationHistory = chatAreaMessages[topic] || [];
-      const context = `
-        You are a chatbot for ${businessInfo.name}, a ${businessInfo.industry} company in ${businessInfo.location}.
-        
-        BUSINESS CONTEXT:
-        - Services: ${businessInfo.services}
-        - Experience: ${businessInfo.experience}
-        - Specialties: ${businessInfo.specialties}
-        - Service Areas: ${businessInfo.serviceAreas}
-        - Contact: ${businessInfo.phone} | ${businessInfo.email}
-        
-        CURRENT TOPIC: ${topic} - ${topics.find(t => t.id === topic)?.title}
-        
-        CONVERSATION GUIDELINES:
-        - Be helpful, friendly, and professional
-        - Keep responses concise (2-3 sentences)
-        - Focus on the current topic: ${topic}
-        - Ask relevant follow-up questions
-        - Provide specific information about our services when appropriate
-        
-        USER MESSAGE: ${userMessage}
-      `;
+      
+      const response = await fetch('/api/chat/response', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: userMessage,
+          topic: topic,
+          businessInfo: businessInfo,
+          conversationHistory: conversationHistory
+        }),
+      });
 
-      // Simulate API call with realistic response
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Generate contextual response based on topic and message
-      let response = '';
-      
-      if (topic === 'WHY') {
-        if (userMessage.toLowerCase().includes('problem') || userMessage.toLowerCase().includes('issue')) {
-          response = `I understand you're facing some challenges. ${businessInfo.name} has ${businessInfo.experience} and specializes in ${businessInfo.specialties}. Can you tell me more about the specific issue you're dealing with?`;
-        } else if (userMessage.toLowerCase().includes('service') || userMessage.toLowerCase().includes('information')) {
-          response = `Great! We provide ${businessInfo.services} throughout ${businessInfo.serviceAreas}. What specific service are you most interested in learning about?`;
-        } else {
-          response = `Thanks for sharing that with me. ${businessInfo.name} is here to help with all your ${businessInfo.industry} needs. What's the main reason you're looking for our services today?`;
-        }
-      } else if (topic === 'WHAT') {
-        response = `Perfect! We offer comprehensive ${businessInfo.services}. Based on what you've shared, I think we can definitely help. Which of these services interests you most?`;
-      } else if (topic === 'WHERE') {
-        response = `Got it! We serve ${businessInfo.serviceAreas}. We're familiar with that area and can definitely provide service there. Is this for residential or commercial property?`;
-      } else if (topic === 'WHEN') {
-        response = `That timeline works well for us. We offer flexible scheduling and can often accommodate urgent needs. Would you prefer a specific time of day or day of the week?`;
-      } else if (topic === 'WHO') {
-        response = `Perfect! I have all the information I need. One of our ${businessInfo.name} experts will reach out to you soon using your preferred contact method to discuss your needs.`;
-      } else {
-        response = `Thank you for that information. I'm here to help connect you with our team. Is there anything else you'd like to know about our services?`;
+      if (!response.ok) {
+        throw new Error(`API call failed: ${response.status}`);
       }
-      
-      return response;
+
+      const data = await response.json();
+      return {
+        response: data.message || `I'd be happy to help with your ${topic.toLowerCase()} questions!`,
+        nextTopic: data.nextTopic,
+        isComplete: data.isTopicComplete
+      };
       
     } catch (error) {
       console.error('Error calling Gemini API:', error);
-      return `I'd be happy to help! Our team at ${businessInfo.name} can provide detailed information about your ${businessInfo.industry} needs.`;
+      return {
+        response: `I'd be happy to help! Our team at ${businessInfo.name} can provide detailed information about your ${businessInfo.industry} needs.`
+      };
     } finally {
       setIsProcessing(false);
     }
@@ -338,13 +315,13 @@ export function EnhancedChatbot({
 
     try {
       // Get AI response
-      const response = await callGeminiAPI(userMessage.content, activeTab);
+      const aiResponse = await callGeminiAPI(userMessage.content, activeTab);
       
       // Create bot response
       const botMessage: ConversationMessage = {
         id: generateMessageId(),
         type: 'bot',
-        content: response,
+        content: aiResponse.response,
         timestamp: new Date().toISOString(),
         topic: activeTab
       };
@@ -370,14 +347,24 @@ export function EnhancedChatbot({
         onLeadUpdate(updatedLeadData);
       }
 
-      // Check if topic should be marked complete and move to next
-      setTimeout(() => {
-        const currentTabMessages = (chatAreaMessages[activeTab] || []).length;
-        const completedArray = Array.from(completedTopics);
-        if (currentTabMessages >= 4 && !completedArray.includes(activeTab)) {
+      // Check if AI suggested topic completion or auto-advance
+      if (aiResponse.isComplete && aiResponse.nextTopic) {
+        setTimeout(() => {
           markTopicComplete(activeTab);
-        }
-      }, 2000);
+          if (aiResponse.nextTopic) {
+            askTopicQuestion(aiResponse.nextTopic);
+          }
+        }, 2000);
+      } else {
+        // Fallback: Check if topic should be marked complete and move to next
+        setTimeout(() => {
+          const currentTabMessages = (chatAreaMessages[activeTab] || []).length;
+          const completedArray = Array.from(completedTopics);
+          if (currentTabMessages >= 6 && !completedArray.includes(activeTab)) {
+            markTopicComplete(activeTab);
+          }
+        }, 3000);
+      }
 
     } catch (error) {
       console.error('Error processing message:', error);
