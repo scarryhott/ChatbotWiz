@@ -93,7 +93,7 @@ export function EnhancedChatbot({
   const [currentMessage, setCurrentMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [currentTopicIndex, setCurrentTopicIndex] = useState(0); // Start with WHY (index 0)
+  const [currentTopicIndex, setCurrentTopicIndex] = useState(2); // Start with WHY (index 2 in WHO-WHAT-WHY-WHERE-WHEN order)
   const [completedTopics, setCompletedTopics] = useState<Set<string>>(new Set());
   const [activeTab, setActiveTab] = useState('WHY');
   const [chatAreaMessages, setChatAreaMessages] = useState<Record<string, ConversationMessage[]>>({
@@ -137,17 +137,8 @@ export function EnhancedChatbot({
     website: config.website
   };
 
-  // Topics configuration - Enhanced 5W framework in correct order
+  // Topics configuration - Enhanced 5W framework with WHO-WHAT-WHY-WHERE-WHEN order, starting with WHY
   const topics = [
-    { 
-      id: 'WHY', 
-      title: 'Your Needs',
-      question: config.conversation?.topics?.find(t => t.id === 'WHY')?.question || `What brings you here today? How can we help you?`, 
-      info: `We specialize in ${businessInfo.specialties} and provide exceptional service.`,
-      icon: MessageCircle,
-      done: false,
-      responses: []
-    },
     { 
       id: 'WHO', 
       title: 'Contact Info',
@@ -163,6 +154,15 @@ export function EnhancedChatbot({
       question: config.conversation?.topics?.find(t => t.id === 'WHAT')?.question || `What ${businessInfo.industry} services do you need?`, 
       info: `We offer ${businessInfo.services}.`,
       icon: HelpCircle,
+      done: false,
+      responses: []
+    },
+    { 
+      id: 'WHY', 
+      title: 'Your Needs',
+      question: config.conversation?.topics?.find(t => t.id === 'WHY')?.question || `What brings you here today? How can we help you?`, 
+      info: `We specialize in ${businessInfo.specialties} and provide exceptional service.`,
+      icon: MessageCircle,
       done: false,
       responses: []
     },
@@ -406,23 +406,23 @@ export function EnhancedChatbot({
         borderColor: config.ui.theme.primaryColor
       }}
     >
-      {/* Header */}
+      {/* Header - Reduced height */}
       <div 
-        className="p-4 text-white text-center"
+        className="p-3 text-white text-center"
         style={{ 
           background: `linear-gradient(135deg, ${config.ui.theme.primaryColor}, ${config.ui.theme.secondaryColor})`
         }}
       >
-        <div className="flex items-center justify-center gap-3 mb-2">
+        <div className="flex items-center justify-center gap-2 mb-1">
           <div 
-            className="w-10 h-10 rounded-full flex items-center justify-center text-xl"
+            className="w-8 h-8 rounded-full flex items-center justify-center text-lg"
             style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}
           >
             🤖
           </div>
-          <h1 className="text-lg font-semibold">{businessInfo.name}</h1>
+          <h1 className="text-base font-semibold">{businessInfo.name}</h1>
         </div>
-        <p className="text-sm opacity-90">{businessInfo.services} - {businessInfo.location}</p>
+        <p className="text-xs opacity-90">{businessInfo.services} - {businessInfo.location}</p>
       </div>
 
       {/* Topic Tabs */}

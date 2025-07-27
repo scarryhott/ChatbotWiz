@@ -123,18 +123,18 @@ export function ToggleableChatbot({
       }
     }
     
-    // For preview mode, use proportional sizing to the preview container
+    // For preview mode, use proportional sizing to the preview container with better height ratios
     switch (size) {
       case 'small':
-        return previewMode === 'mobile' ? 'w-20 h-28' : 'w-32 h-40';
+        return previewMode === 'mobile' ? 'w-20 h-32' : 'w-32 h-48';
       case 'medium':
-        return previewMode === 'mobile' ? 'w-24 h-32' : 'w-40 h-48';
+        return previewMode === 'mobile' ? 'w-24 h-36' : 'w-40 h-56';
       case 'large':
-        return previewMode === 'mobile' ? 'w-28 h-36' : 'w-48 h-56';
+        return previewMode === 'mobile' ? 'w-28 h-40' : 'w-48 h-64';
       case 'fullscreen':
         return 'w-full h-full';
       default:
-        return previewMode === 'mobile' ? 'w-24 h-32' : 'w-40 h-48';
+        return previewMode === 'mobile' ? 'w-24 h-36' : 'w-40 h-56';
     }
   };
 
