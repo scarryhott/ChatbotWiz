@@ -5,6 +5,7 @@ import AdvancedChatbot from "@/components/AdvancedChatbot";
 import { EnhancedChatbot } from "@/components/EnhancedChatbot";
 import { ToggleableChatbot } from "@/components/ToggleableChatbot";
 import LeadManagement from "@/components/LeadManagement";
+import EnhancedLeadCollection from "@/components/EnhancedLeadCollection";
 import WebsiteAnalyzer from "@/components/WebsiteAnalyzer";
 import InstallationTab from "@/components/InstallationTab";
 import { useQuery } from "@tanstack/react-query";
@@ -117,7 +118,7 @@ export default function Dashboard() {
               </TabsContent>
 
               <TabsContent value="leads" className="space-y-6">
-                <LeadManagement chatbotId={selectedChatbotId} />
+                <EnhancedLeadCollection chatbotId={selectedChatbotId} />
               </TabsContent>
 
               <TabsContent value="preview" className="space-y-6">

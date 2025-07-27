@@ -24,6 +24,8 @@ const defaultUIConfig = {
   position: "bottom-right" as const,
   transparentBackground: false,
   scrollMode: false,
+  transparentMessages: false,
+  messageStyle: "bubbles" as const,
   entryAnimation: "slide-up" as const,
   typingIndicator: "dots" as const,
   autoStartTrigger: "5-second-delay" as const,
@@ -289,6 +291,31 @@ export default function EnhancedUICustomization({ chatbot }: EnhancedUICustomiza
                       onCheckedChange={(checked) => updateConfig('scrollMode', checked)}
                     />
                   </div>
+
+                  <div className="flex items-center justify-between">
+                    <Label>Transparent Messages</Label>
+                    <Switch
+                      checked={uiConfig.transparentMessages}
+                      onCheckedChange={(checked) => updateConfig('transparentMessages', checked)}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Message Style</Label>
+                    <Select
+                      value={uiConfig.messageStyle}
+                      onValueChange={(value) => updateConfig('messageStyle', value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="bubbles">Chat Bubbles</SelectItem>
+                        <SelectItem value="scroll">Scroll Style</SelectItem>
+                        <SelectItem value="minimal">Minimal</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
@@ -350,7 +377,9 @@ export default function EnhancedUICustomization({ chatbot }: EnhancedUICustomiza
                         <SelectItem value="5-second-delay">5 Second Delay</SelectItem>
                         <SelectItem value="scroll-50">50% Scroll</SelectItem>
                         <SelectItem value="exit-intent">Exit Intent</SelectItem>
-                        <SelectItem value="manual">Manual</SelectItem>
+                        <SelectItem value="time-on-page">Time on Page (30s)</SelectItem>
+                        <SelectItem value="mouse-hover">Mouse Hover</SelectItem>
+                        <SelectItem value="manual">Manual Only</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

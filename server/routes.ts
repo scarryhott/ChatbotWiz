@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertChatbotSchema, insertLeadSchema, insertFirebaseTopicSchema } from "@shared/schema";
+import firebaseRoutes from "./routes/firebase";
 import { analyzeWebsite, generateChatbotConfig } from "./services/websiteAnalyzer";
 import { generateChatResponse } from "./services/gemini";
 import { z } from "zod";
@@ -187,6 +188,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(400).json({ message: "Failed to complete firebase topic", error: (error as Error).message });
     }
   });
+
+  // Mount Firebase routes
+  app.use("/api/firebase", firebaseRoutes);
 
   const httpServer = createServer(app);
   return httpServer;

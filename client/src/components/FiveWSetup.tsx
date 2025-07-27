@@ -32,6 +32,9 @@ const defaultQuestions = {
   WHO: 'How would you like us to contact you? What\'s the best way to reach you?'
 };
 
+// Reorder topics to start with WHY
+const topicOrder = ['WHY', 'WHO', 'WHAT', 'WHERE', 'WHEN'] as const;
+
 export default function FiveWSetup({ chatbot }: FiveWSetupProps) {
   const [questions, setQuestions] = useState(() => ({
     WHY: chatbot.config.conversation?.customQuestions?.WHY || defaultQuestions.WHY,
@@ -174,7 +177,8 @@ export default function FiveWSetup({ chatbot }: FiveWSetupProps) {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {Object.entries(questions).map(([topic, question]) => {
+          {topicOrder.map((topic) => {
+            const question = questions[topic];
             const Icon = topicIcons[topic as keyof typeof topicIcons];
             return (
               <div key={topic} className="space-y-2">

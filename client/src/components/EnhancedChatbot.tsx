@@ -93,7 +93,7 @@ export function EnhancedChatbot({
   const [currentMessage, setCurrentMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [currentTopicIndex, setCurrentTopicIndex] = useState(2); // Start with WHY (index 2)
+  const [currentTopicIndex, setCurrentTopicIndex] = useState(0); // Start with WHY (index 0)
   const [completedTopics, setCompletedTopics] = useState<Set<string>>(new Set());
   const [activeTab, setActiveTab] = useState('WHY');
   const [chatAreaMessages, setChatAreaMessages] = useState<Record<string, ConversationMessage[]>>({
@@ -137,12 +137,21 @@ export function EnhancedChatbot({
     website: config.website
   };
 
-  // Topics configuration - Enhanced 5W framework
+  // Topics configuration - Enhanced 5W framework in correct order
   const topics = [
+    { 
+      id: 'WHY', 
+      title: 'Your Needs',
+      question: config.conversation?.topics?.find(t => t.id === 'WHY')?.question || `What brings you here today? How can we help you?`, 
+      info: `We specialize in ${businessInfo.specialties} and provide exceptional service.`,
+      icon: MessageCircle,
+      done: false,
+      responses: []
+    },
     { 
       id: 'WHO', 
       title: 'Contact Info',
-      question: 'How would you prefer we contact you?', 
+      question: config.conversation?.topics?.find(t => t.id === 'WHO')?.question || 'How would you prefer we contact you?', 
       info: `We can reach out via phone, email, or text - whatever works best for you.`,
       icon: Phone,
       done: false,
@@ -151,25 +160,16 @@ export function EnhancedChatbot({
     { 
       id: 'WHAT', 
       title: 'Service Needed',
-      question: `What ${businessInfo.industry} services do you need?`, 
+      question: config.conversation?.topics?.find(t => t.id === 'WHAT')?.question || `What ${businessInfo.industry} services do you need?`, 
       info: `We offer ${businessInfo.services}.`,
       icon: HelpCircle,
       done: false,
       responses: []
     },
     { 
-      id: 'WHY', 
-      title: 'Your Needs',
-      question: `What specific ${businessInfo.industry} challenges are you facing?`, 
-      info: `We specialize in ${businessInfo.specialties} and provide exceptional service.`,
-      icon: MessageCircle,
-      done: false,
-      responses: []
-    },
-    { 
       id: 'WHERE', 
       title: 'Location',
-      question: 'What area are you located in?', 
+      question: config.conversation?.topics?.find(t => t.id === 'WHERE')?.question || 'What area are you located in?', 
       info: `We serve ${businessInfo.serviceAreas}.`,
       icon: MapPin,
       done: false,
@@ -178,7 +178,7 @@ export function EnhancedChatbot({
     { 
       id: 'WHEN', 
       title: 'Timing',
-      question: 'When do you need service?', 
+      question: config.conversation?.topics?.find(t => t.id === 'WHEN')?.question || 'When do you need service?', 
       info: 'We offer flexible scheduling to meet your needs.',
       icon: Calendar,
       done: false,
@@ -350,7 +350,30 @@ export function EnhancedChatbot({
 
   const markTopicComplete = (topicId: string) => {
     setCompletedTopics(prev => new Set(Array.from(prev).concat([topicId])));
+    
+    // Update Firebase topic completion
+    updateFirebaseTopic(topicId, userId.current);
+    
     // Let AI handle topic progression naturally - no automatic next topic questions
+  };
+
+  const updateFirebaseTopic = async (topicId: string, userId: string) => {
+    try {
+      await fetch('/api/firebase/topics', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId,
+          topicId,
+          completed: true,
+          timestamp: new Date().toISOString()
+        }),
+      });
+    } catch (error) {
+      console.error('Error updating Firebase topic:', error);
+    }
   };
 
   const handleTabClick = (topicId: string) => {
@@ -423,11 +446,17 @@ export function EnhancedChatbot({
                 )}
               >
                 <div className="relative">
-                  <Icon size={18} />
-                  {isCompleted && (
-                    <Check 
-                      size={12} 
-                      className="absolute -top-1 -right-1 text-green-500 bg-white rounded-full"
+                  {isCompleted ? (
+                    <div className="w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center">
+                      <Check size={14} />
+                    </div>
+                  ) : (
+                    <Icon 
+                      size={18} 
+                      className={cn(
+                        "transition-colors",
+                        isActive ? "text-blue-600" : "text-gray-600"
+                      )}
                     />
                   )}
                 </div>
