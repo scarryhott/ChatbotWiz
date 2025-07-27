@@ -178,8 +178,8 @@ export function EnhancedChatbot({
     { 
       id: 'WHEN', 
       title: 'Timing',
-      question: config.conversation?.topics?.find(t => t.id === 'WHEN')?.question || 'When do you need service?', 
-      info: 'We offer flexible scheduling to meet your needs.',
+      question: config.conversation?.topics?.find(t => t.id === 'WHEN')?.question || 'When would you like to schedule service?', 
+      info: 'We offer flexible scheduling including mornings, afternoons, evenings, and emergency service.',
       icon: Calendar,
       done: false,
       responses: []
