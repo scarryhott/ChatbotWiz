@@ -1,37 +1,39 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertChatbotSchema, insertLeadSchema, insertFirebaseTopicSchema } from "@shared/schema";
-import firebaseRoutes from "./routes/firebase";
+import { insertChatbotSchema, insertLeadSchema, insertTopicCompletionSchema } from "@shared/schema";
 import { analyzeWebsite, generateChatbotConfig } from "./services/websiteAnalyzer";
 import { generateChatResponse } from "./services/gemini";
+import { setupAuth, isAuthenticated } from "./replitAuth";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Get current user (demo user for now)
-  app.get("/api/user", async (req, res) => {
+  // Setup Replit Authentication
+  await setupAuth(app);
+
+  // Auth routes
+  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUser("demo-user-1");
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
       res.json(user);
     } catch (error) {
-      res.status(500).json({ message: "Failed to get user", error: (error as Error).message });
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
     }
   });
-
-  // Chatbot routes
-  app.get("/api/chatbots", async (req, res) => {
+  // Protected chatbot routes
+  app.get("/api/chatbots", isAuthenticated, async (req: any, res) => {
     try {
-      const chatbots = await storage.getChatbotsByUserId("demo-user-1");
+      const userId = req.user.claims.sub;
+      const chatbots = await storage.getChatbotsByUserId(userId);
       res.json(chatbots);
     } catch (error) {
       res.status(500).json({ message: "Failed to get chatbots", error: (error as Error).message });
     }
   });
 
-  app.get("/api/chatbots/:id", async (req, res) => {
+  app.get("/api/chatbots/:id", isAuthenticated, async (req: any, res) => {
     try {
       const chatbot = await storage.getChatbot(req.params.id);
       if (!chatbot) {
@@ -43,17 +45,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/chatbots", async (req, res) => {
+  app.post("/api/chatbots", isAuthenticated, async (req: any, res) => {
     try {
       const validatedData = insertChatbotSchema.parse(req.body);
-      const chatbot = await storage.createChatbot(validatedData);
+      const chatbot = await storage.createChatbot({
+        userId: req.user.claims.sub,
+        ...validatedData,
+      });
       res.status(201).json(chatbot);
     } catch (error) {
       res.status(400).json({ message: "Failed to create chatbot", error: (error as Error).message });
     }
   });
 
-  app.put("/api/chatbots/:id", async (req, res) => {
+  app.put("/api/chatbots/:id", isAuthenticated, async (req: any, res) => {
     try {
       const updates = insertChatbotSchema.partial().parse(req.body);
       const chatbot = await storage.updateChatbot(req.params.id, updates);
@@ -82,8 +87,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Lead routes
-  app.get("/api/chatbots/:chatbotId/leads", async (req, res) => {
+  // Protected lead routes
+  app.get("/api/chatbots/:chatbotId/leads", isAuthenticated, async (req: any, res) => {
     try {
       const { search, completed } = req.query;
       let leads;
@@ -102,7 +107,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/chatbots/:chatbotId/leads", async (req, res) => {
+  app.post("/api/chatbots/:chatbotId/leads", isAuthenticated, async (req: any, res) => {
     try {
       const leadData = {
         ...req.body,
@@ -190,7 +195,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Mount Firebase routes
-  app.use("/api/firebase", firebaseRoutes);
+  // Firebase routes removed - using PostgreSQL database instead
 
   const httpServer = createServer(app);
   return httpServer;

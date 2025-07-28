@@ -1,12 +1,28 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, jsonb, timestamp, boolean, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, jsonb, timestamp, boolean, integer, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// Session storage table for Replit Auth
+export const sessions = pgTable(
+  "sessions",
+  {
+    sid: varchar("sid").primaryKey(),
+    sess: jsonb("sess").notNull(),
+    expire: timestamp("expire").notNull(),
+  },
+  (table) => [index("IDX_session_expire").on(table.expire)],
+);
+
+// User storage table for Replit Auth
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
+  email: varchar("email").unique(),
+  firstName: varchar("first_name"),
+  lastName: varchar("last_name"),
+  profileImageUrl: varchar("profile_image_url"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const chatbots = pgTable("chatbots", {
@@ -35,7 +51,8 @@ export const leads = pgTable("leads", {
   updatedAt: timestamp("updated_at").default(sql`now()`),
 });
 
-export const firebaseTopics = pgTable("firebase_topics", {
+// Topic completion tracking (replaced Firebase functionality)
+export const topicCompletions = pgTable("topic_completions", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull().references(() => users.id),
   leadId: varchar("lead_id").notNull().references(() => leads.id),
@@ -115,9 +132,9 @@ export interface ConversationMessage {
 }
 
 // Insert schemas
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
+export const insertUserSchema = createInsertSchema(users).omit({
+  createdAt: true,
+  updatedAt: true,
 });
 
 export const insertChatbotSchema = createInsertSchema(chatbots).omit({
@@ -132,18 +149,19 @@ export const insertLeadSchema = createInsertSchema(leads).omit({
   updatedAt: true,
 });
 
-export const insertFirebaseTopicSchema = createInsertSchema(firebaseTopics).omit({
+export const insertTopicCompletionSchema = createInsertSchema(topicCompletions).omit({
   id: true,
 });
 
 // Select types
 export type User = typeof users.$inferSelect;
+export type UpsertUser = typeof users.$inferInsert;
 export type Chatbot = typeof chatbots.$inferSelect;
 export type Lead = typeof leads.$inferSelect;
-export type FirebaseTopic = typeof firebaseTopics.$inferSelect;
+export type TopicCompletion = typeof topicCompletions.$inferSelect;
 
 // Insert types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type InsertChatbot = z.infer<typeof insertChatbotSchema>;
 export type InsertLead = z.infer<typeof insertLeadSchema>;
-export type InsertFirebaseTopic = z.infer<typeof insertFirebaseTopicSchema>;
+export type InsertTopicCompletion = z.infer<typeof insertTopicCompletionSchema>;

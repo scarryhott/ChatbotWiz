@@ -1,12 +1,11 @@
-import { users, chatbots, leads, firebaseTopics, type User, type InsertUser, type Chatbot, type InsertChatbot, type Lead, type InsertLead, type FirebaseTopic, type InsertFirebaseTopic } from "@shared/schema";
+import { users, chatbots, leads, topicCompletions, type User, type UpsertUser, type InsertUser, type Chatbot, type InsertChatbot, type Lead, type InsertLead, type TopicCompletion, type InsertTopicCompletion } from "@shared/schema";
 import { db } from "./db";
 import { eq, like, and } from "drizzle-orm";
 
 export interface IStorage {
-  // User methods
+  // User methods - Required for Replit Auth
   getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  upsertUser(user: UpsertUser): Promise<User>;
 
   // Chatbot methods
   getChatbot(id: string): Promise<Chatbot | undefined>;
@@ -23,10 +22,10 @@ export interface IStorage {
   searchLeads(chatbotId: string, query: string): Promise<Lead[]>;
   getLeadsByCompletion(chatbotId: string, completed: boolean): Promise<Lead[]>;
 
-  // Firebase topic methods
-  getFirebaseTopics(userId: string, leadId: string): Promise<FirebaseTopic[]>;
-  createFirebaseTopic(topic: InsertFirebaseTopic): Promise<FirebaseTopic>;
-  updateFirebaseTopic(id: string, updates: Partial<InsertFirebaseTopic>): Promise<FirebaseTopic>;
+  // Topic completion methods (replaced Firebase)
+  getTopicCompletions(userId: string, leadId: string): Promise<TopicCompletion[]>;
+  createTopicCompletion(topic: InsertTopicCompletion): Promise<TopicCompletion>;
+  updateTopicCompletion(id: string, updates: Partial<InsertTopicCompletion>): Promise<TopicCompletion>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -41,11 +40,15 @@ export class DatabaseStorage implements IStorage {
       const existingUser = await this.getUser("demo-user-1");
       if (existingUser) return; // Demo data already exists
 
-      // Demo user
+      // Demo user for Replit Auth format
       const demoUser = {
         id: "demo-user-1",
-        username: "demo",
-        password: "password"
+        email: "demo@wwwwwai.com",
+        firstName: "Demo",
+        lastName: "User",
+        profileImageUrl: null,
+        createdAt: new Date(),
+        updatedAt: new Date()
       };
       await db.insert(users).values(demoUser);
 
@@ -192,8 +195,8 @@ export class DatabaseStorage implements IStorage {
 
       await db.insert(leads).values(demoLeads);
 
-      // Demo Firebase topics
-      const demoTopics: FirebaseTopic[] = [
+      // Demo topic completions
+      const demoCompletions: TopicCompletion[] = [
         {
           id: "demo-topic-1",
           userId: "demo-user-1",
@@ -220,28 +223,30 @@ export class DatabaseStorage implements IStorage {
         }
       ];
 
-      await db.insert(firebaseTopics).values(demoTopics);
+      await db.insert(topicCompletions).values(demoCompletions);
     } catch (error) {
       console.error("Error initializing demo data:", error);
       // Continue anyway - this is just demo data
     }
   }
 
-  // User methods
+  // User methods - Required for Replit Auth
   async getUser(id: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user || undefined;
+    return user;
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
-    return user || undefined;
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
+  async upsertUser(userData: UpsertUser): Promise<User> {
     const [user] = await db
       .insert(users)
-      .values(insertUser)
+      .values(userData)
+      .onConflictDoUpdate({
+        target: users.id,
+        set: {
+          ...userData,
+          updatedAt: new Date(),
+        },
+      })
       .returning();
     return user;
   }
@@ -328,22 +333,22 @@ export class DatabaseStorage implements IStorage {
       );
   }
 
-  // Firebase topic methods
-  async getFirebaseTopics(userId: string, leadId: string): Promise<FirebaseTopic[]> {
+  // Topic completion methods (replaced Firebase)
+  async getTopicCompletions(userId: string, leadId: string): Promise<TopicCompletion[]> {
     return await db
       .select()
-      .from(firebaseTopics)
+      .from(topicCompletions)
       .where(
         and(
-          eq(firebaseTopics.userId, userId),
-          eq(firebaseTopics.leadId, leadId)
+          eq(topicCompletions.userId, userId),
+          eq(topicCompletions.leadId, leadId)
         )
       );
   }
 
-  async createFirebaseTopic(insertTopic: InsertFirebaseTopic): Promise<FirebaseTopic> {
+  async createTopicCompletion(insertTopic: InsertTopicCompletion): Promise<TopicCompletion> {
     const [topic] = await db
-      .insert(firebaseTopics)
+      .insert(topicCompletions)
       .values({
         ...insertTopic,
         isCompleted: insertTopic.isCompleted ?? false,
@@ -352,11 +357,11 @@ export class DatabaseStorage implements IStorage {
     return topic;
   }
 
-  async updateFirebaseTopic(id: string, updates: Partial<InsertFirebaseTopic>): Promise<FirebaseTopic> {
+  async updateTopicCompletion(id: string, updates: Partial<InsertTopicCompletion>): Promise<TopicCompletion> {
     const [topic] = await db
-      .update(firebaseTopics)
+      .update(topicCompletions)
       .set(updates)
-      .where(eq(firebaseTopics.id, id))
+      .where(eq(topicCompletions.id, id))
       .returning();
     return topic;
   }

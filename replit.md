@@ -4,23 +4,20 @@
 
 This is a full-stack TypeScript application for an AI-powered chatbot creation and management platform called "wwwwwai". The application allows users to create, configure, and deploy customizable chatbots that use a "5W framework" (Why, What, When, Where, Who) to guide conversations and collect leads. The system features real-time chat capabilities, AI-powered website analysis, comprehensive lead management, and a toggleable widget UI for seamless website integration.
 
-## Recent Changes (January 26, 2025)
+## Recent Changes (January 28, 2025)
 
-✓ **Enhanced Gemini AI Integration** - Implemented real-time AI responses with intelligent topic switching
-✓ **Toggleable Widget UI** - Created collapsible chat widget with minimize/maximize functionality  
-✓ **5W Conversation Flow** - Built structured conversation management with visual progress indicators
-✓ **Complete Installation System** - Added embed code generation for multiple platforms (HTML, WordPress, React, Shopify)
-✓ **Configuration Adapter** - Built seamless bridge between database config and chatbot requirements
-✓ **Universal Embed Script** - Generated embeddable JavaScript with customizable positioning and styling
-✓ **Intelligent Topic Switching** - AI now switches to appropriate topic tab BEFORE responding, ensuring conversation continuity
-✓ **Give Before Take Philosophy** - AI provides value, expertise, and solutions before asking for user information
-✓ **Enhanced Configure Tab** - Complete 5W Flow Setup with customizable topic questions and conversation flow settings
-✓ **Advanced UI Customization** - Real-time preview with full theme control (colors, animations, positioning, behavior)
-✓ **Integrated Widget Theming** - Chatbot widget dynamically applies user-customized colors, border radius, and animations
-✓ **Custom Questions System** - Users can customize all 5W topic questions with visual icons and descriptions
-✓ **Responsive Widget Sizing** - Widget dimensions now scale proportionally to screen size using viewport units (vw/vh) instead of fixed pixels
-✓ **Fullscreen Preview Mode** - Added expandable fullscreen preview with exit functionality for better widget testing
-✓ **Preview-Proportional Sizing** - Widget sizes in preview mode are proportional to preview container dimensions
+✓ **Complete Replit Authentication System** - Implemented full user authentication with login/logout flows
+✓ **PostgreSQL Database Migration** - Converted from Firebase to Replit's built-in PostgreSQL database
+✓ **User-Specific Lead Storage** - Each user's chatbots now store leads independently with proper isolation
+✓ **Protected API Routes** - All chatbot and lead endpoints now require authentication
+✓ **Landing Page for Logged-Out Users** - Beautiful marketing page with features overview and login CTA
+✓ **Session Management** - Secure session storage using PostgreSQL with automatic token refresh
+✓ **Database Schema Updates** - Updated to support Replit Auth user format (email, firstName, lastName, profileImageUrl)
+✓ **Topic Completion Tracking** - Replaced Firebase with PostgreSQL-based topic completion system
+✓ **Authentication-Aware Frontend** - Router automatically shows landing page or dashboard based on auth state
+✓ **Removed Duplicate Headers** - Cleaned up chatbot widget interface for better UX
+✓ **Responsive Content Scaling** - All chatbot content now scales properly with widget size settings
+✓ **Enhanced Error Handling** - Proper 401 handling and authentication error states
 
 ## User Preferences
 
