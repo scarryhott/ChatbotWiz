@@ -298,7 +298,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getLeadsByChatbotId(chatbotId: string): Promise<Lead[]> {
-    return await db.select().from(leads).where(eq(leads.chatbotId, chatbotId));
+    console.log('Fetching leads for chatbot:', chatbotId);
+    const results = await db.select().from(leads).where(eq(leads.chatbotId, chatbotId));
+    console.log('Found leads:', results.length);
+    return results;
   }
 
   async createLead(insertLead: InsertLead): Promise<Lead> {

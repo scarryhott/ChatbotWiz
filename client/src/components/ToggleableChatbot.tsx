@@ -208,6 +208,7 @@ export function ToggleableChatbot({
               <div className="flex-1 overflow-hidden">
                 <EnhancedChatbot
                   config={{
+                    id: chatbotId,
                     businessName: config.businessName || 'Assistant',
                     location: config.location || 'Local area',
                     services: config.services || 'Professional services',
