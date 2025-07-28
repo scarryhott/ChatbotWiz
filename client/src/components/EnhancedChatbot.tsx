@@ -477,7 +477,6 @@ export function EnhancedChatbot({
           </div>
           <h1 className={`${sizeStyles.messageSize} font-semibold`}>{businessInfo.name}</h1>
         </div>
-        <p className={`${widgetSize === 'small' ? 'text-xs' : sizeStyles.messageSize} opacity-90`}>{businessInfo.services} - {businessInfo.location}</p>
       </div>
 
       {/* Topic Tabs - Scalable */}
