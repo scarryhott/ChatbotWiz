@@ -25,6 +25,7 @@ export default function WebsiteAnalyzer({ onChatbotCreated }: WebsiteAnalyzerPro
   // Manual creation state
   const [manualName, setManualName] = useState("");
   const [manualCompany, setManualCompany] = useState("");
+  const [manualWebsiteUrl, setManualWebsiteUrl] = useState("");
   const [manualEthos, setManualEthos] = useState("");
   const [manualKnowledgeBase, setManualKnowledgeBase] = useState("");
   
@@ -105,12 +106,22 @@ export default function WebsiteAnalyzer({ onChatbotCreated }: WebsiteAnalyzerPro
     const chatbotData = {
       userId: "demo-user-1", // TODO: Use actual user ID
       name: chatbotName,
-      domain: websiteUrl,
       config: {
         ...config,
         company: {
           ...config.company,
           website: websiteUrl
+        },
+        conversation: {
+          customQuestions: {
+            WHY: config.topics?.why?.question || "What brings you here today?",
+            WHAT: config.topics?.what?.question || "What specific products or services are you interested in?",
+            WHERE: config.topics?.where?.question || "Where are you located?",
+            WHEN: config.topics?.when?.question || "What's your timeline?",
+            WHO: config.topics?.who?.question || "Who would be involved in making this decision?"
+          },
+          flow: "5W" as const,
+          maxFollowUps: 3
         }
       },
       isActive: true
@@ -155,7 +166,7 @@ export default function WebsiteAnalyzer({ onChatbotCreated }: WebsiteAnalyzerPro
       company: {
         name: manualCompany,
         ethos: manualEthos,
-        website: "",
+        website: manualWebsiteUrl,
         knowledgeBase: manualKnowledgeBase || "General business information and customer support."
       },
       topics: {
@@ -179,6 +190,17 @@ export default function WebsiteAnalyzer({ onChatbotCreated }: WebsiteAnalyzerPro
           question: "Who would be involved in making this decision?",
           completed: false
         }
+      },
+      conversation: {
+        customQuestions: {
+          WHY: "What brings you here today? What are you hoping to achieve?",
+          WHAT: "What specific products or services are you interested in?",
+          WHERE: "Where are you located or where would you need service?",
+          WHEN: "What's your timeline for making a decision?",
+          WHO: "Who would be involved in making this decision?"
+        },
+        flow: "5W" as const,
+        maxFollowUps: 3
       },
       ui: {
         size: "medium",
@@ -211,7 +233,6 @@ export default function WebsiteAnalyzer({ onChatbotCreated }: WebsiteAnalyzerPro
     const chatbotData = {
       userId: "demo-user-1",
       name: manualName,
-      domain: "",
       config: manualConfig,
       isActive: true
     };
@@ -438,6 +459,16 @@ export default function WebsiteAnalyzer({ onChatbotCreated }: WebsiteAnalyzerPro
                     placeholder="Enter company name"
                   />
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="manual-website">Website URL</Label>
+                <Input
+                  id="manual-website"
+                  value={manualWebsiteUrl}
+                  onChange={(e) => setManualWebsiteUrl(e.target.value)}
+                  placeholder="https://yourwebsite.com (used for preview embedding)"
+                />
               </div>
 
               <div className="space-y-2">
