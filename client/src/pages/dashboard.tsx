@@ -149,6 +149,7 @@ export default function Dashboard() {
                       <div className="absolute bottom-4 right-4 z-10">
                         <ToggleableChatbot 
                           config={adaptChatbotConfig(selectedChatbot)}
+                          chatbotId={selectedChatbot.id}
                           onLeadUpdate={(leadData) => {
                             console.log("Preview lead captured:", leadData);
                           }}
@@ -182,6 +183,7 @@ export default function Dashboard() {
         {selectedChatbot && (
           <ToggleableChatbot 
             config={adaptChatbotConfig(selectedChatbot)}
+            chatbotId={selectedChatbot.id}
             onLeadUpdate={(leadData) => {
               console.log("New lead captured:", leadData);
               setActiveTab("leads");

@@ -22,6 +22,7 @@ interface ChatbotConfig {
 
 interface ToggleableChatbotProps {
   config: ChatbotConfig;
+  chatbotId?: string;
   onLeadUpdate?: (leadData: any) => void;
   onConversationUpdate?: (messages: any[]) => void;
   position?: 'bottom-right' | 'bottom-left' | 'center';
@@ -32,6 +33,7 @@ interface ToggleableChatbotProps {
 
 export function ToggleableChatbot({
   config,
+  chatbotId,
   onLeadUpdate,
   onConversationUpdate,
   position = 'bottom-right',
