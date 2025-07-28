@@ -27,10 +27,10 @@ export default function InstallationTab({ chatbot }: InstallationTabProps) {
 
   const embedConfig = {
     chatbotId: chatbot.id,
-    businessName: chatbot.name,
-    primaryColor: chatbot.config.ui?.theme?.primaryColor || '#3b82f6',
-    position: (chatbot.config.ui?.position || 'bottom-right') as 'bottom-right' | 'bottom-left' | 'center',
-    animation: (chatbot.config.ui?.entryAnimation || 'slide-up') as 'slide-up' | 'fade-in' | 'bounce',
+    businessName: chatbot.name || 'AI Assistant',
+    primaryColor: chatbot.config?.ui?.theme?.primaryColor || '#3b82f6',
+    position: (chatbot.config?.ui?.position || 'bottom-right') as 'bottom-right' | 'bottom-left' | 'center',
+    animation: (chatbot.config?.ui?.entryAnimation || 'slide-up') as 'slide-up' | 'fade-in' | 'bounce',
     delay: 3,
     apiEndpoint: `${window.location.origin}/api/chat/${chatbot.id}`
   };

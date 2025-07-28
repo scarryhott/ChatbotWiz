@@ -50,16 +50,15 @@ export class DatabaseStorage implements IStorage {
       await db.insert(users).values(demoUser);
 
       // Demo chatbot with comprehensive 5W configuration
-      const demoChatbot: Chatbot = {
+      const demoChatbot = {
         id: "demo-chatbot-1",
         userId: "demo-user-1",
         name: "EcoSolutions Assistant",
-        domain: "ecosolutions.demo",
         config: {
           company: {
             name: "EcoSolutions",
             ethos: "We believe in sustainable technology solutions that help businesses reduce their environmental impact while increasing efficiency and profitability.",
-            website: "ecosolutions.demo",
+            website: "https://www.ecosolutions.com",
             knowledgeBase: "Solar Panel Installation, Energy Audits, Green Building Consulting, Sustainable IT Solutions. Pricing: Solar audit $299, Energy audit $199, Consulting $150/hour. Service areas: Austin, Dallas, Houston, San Antonio. Certifications: LEED Certified, Energy Star Partner, Solar Power International Member."
           },
           topics: {
@@ -88,6 +87,17 @@ export class DatabaseStorage implements IStorage {
               completed: false,
               value: undefined
             }
+          },
+          conversation: {
+            customQuestions: {
+              WHY: "What environmental or cost concerns are driving your interest in sustainable solutions?",
+              WHAT: "What specific sustainable solutions are you most interested in learning about?",
+              WHERE: "Where is your business or property located?",
+              WHEN: "When are you looking to implement these sustainable solutions?",
+              WHO: "Who is the main decision-maker for sustainability initiatives at your organization?"
+            },
+            flow: "5W" as const,
+            maxFollowUps: 3
           },
           ui: {
             size: "medium",
@@ -127,9 +137,6 @@ export class DatabaseStorage implements IStorage {
         {
           id: "demo-lead-1",
           chatbotId: "demo-chatbot-1",
-          name: "Sarah Johnson",
-          email: "sarah@techstartup.com",
-          phone: "+1-555-0123",
           fiveWProgress: {
             why: { completed: true, answer: "Looking to reduce energy costs and meet ESG requirements" },
             what: { completed: true, answer: "Solar panels and energy audit" },
@@ -252,11 +259,7 @@ export class DatabaseStorage implements IStorage {
   async createChatbot(insertChatbot: InsertChatbot): Promise<Chatbot> {
     const [chatbot] = await db
       .insert(chatbots)
-      .values({
-        ...insertChatbot,
-        domain: insertChatbot.domain || null,
-        isActive: insertChatbot.isActive ?? true,
-      })
+      .values(insertChatbot)
       .returning();
     return chatbot;
   }
@@ -287,13 +290,7 @@ export class DatabaseStorage implements IStorage {
   async createLead(insertLead: InsertLead): Promise<Lead> {
     const [lead] = await db
       .insert(leads)
-      .values({
-        ...insertLead,
-        name: insertLead.name || null,
-        email: insertLead.email || null,
-        phone: insertLead.phone || null,
-        isCompleted: insertLead.isCompleted ?? false,
-      })
+      .values(insertLead)
       .returning();
     return lead;
   }

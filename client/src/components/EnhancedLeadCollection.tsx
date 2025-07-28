@@ -48,7 +48,7 @@ export default function EnhancedLeadCollection({ chatbotId }: EnhancedLeadCollec
       const response = await fetch(`/api/chatbots/${chatbotId}/leads`);
       if (response.ok) {
         const data = await response.json();
-        setLeads(data);
+        setLeads(data || []);
       }
     } catch (error) {
       console.error('Error fetching leads:', error);

@@ -13,7 +13,6 @@ export const chatbots = pgTable("chatbots", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull().references(() => users.id),
   name: text("name").notNull(),
-  domain: text("domain"),
   config: jsonb("config").$type<ChatbotConfig>().notNull(),
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").default(sql`now()`),
