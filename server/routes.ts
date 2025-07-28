@@ -82,7 +82,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // If topic is complete (green checkmark), save/update lead information
       if (response.isTopicComplete && sessionId && chatbotId) {
-        console.log('Topic completed! Saving lead for session:', sessionId, 'topic:', topic, 'extractedInfo:', response.extractedInfo);
+        console.log('Topic completed! Saving lead for session:', sessionId, 'topic:', topic, 'chatbotId:', chatbotId, 'extractedInfo:', response.extractedInfo);
         try {
           const savedLead = await storage.saveLeadFromSession({
             chatbotId,

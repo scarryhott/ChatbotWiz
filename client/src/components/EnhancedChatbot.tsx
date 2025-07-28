@@ -241,6 +241,8 @@ export function EnhancedChatbot({
       setIsProcessing(true);
       
       const conversationHistory = chatAreaMessages[topic] || [];
+      const chatbotId = config.id || 'demo-chatbot-1';
+      console.log('Sending chat request with chatbotId:', chatbotId, 'config.id:', config.id);
       
       const response = await fetch('/api/chat/response', {
         method: 'POST',
@@ -252,7 +254,7 @@ export function EnhancedChatbot({
           topic: topic,
           businessInfo: businessInfo,
           conversationHistory: conversationHistory,
-          chatbotId: config.id || 'demo-chatbot-1',
+          chatbotId: chatbotId,
           sessionId: sessionId.current
         }),
       });
