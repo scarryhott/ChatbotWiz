@@ -462,26 +462,53 @@ export default function EnhancedUICustomization({ chatbot }: EnhancedUICustomiza
               <div 
                 className={`relative ${
                   previewMode === 'mobile' 
-                    ? 'w-80 h-96 mx-auto bg-gray-100 rounded-lg p-4' 
-                    : 'w-full h-96 bg-gradient-to-br from-blue-50 to-purple-50'
+                    ? 'w-80 h-96 mx-auto bg-gray-100 rounded-lg' 
+                    : 'w-full h-96'
                 } overflow-hidden`}
-                style={{
-                  backgroundImage: previewMode === 'desktop' 
-                    ? 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%239C92AC" fill-opacity="0.1"%3E%3Ccircle cx="30" cy="30" r="3"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")'
-                    : undefined
-                }}
               >
-                <ToggleableChatbot
-                  config={previewConfig}
-                  position={uiConfig.position as any}
-                  autoOpen={false}
-                  className="relative"
-                  previewMode={previewMode}
-                />
+                {/* Embedded website iframe */}
+                {chatbot.config?.company?.website && previewMode === 'desktop' ? (
+                  <iframe
+                    src={chatbot.config.company.website}
+                    className="w-full h-full border-0"
+                    title="Website Preview"
+                    sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+                  />
+                ) : (
+                  <div 
+                    className={`w-full h-full ${
+                      previewMode === 'mobile' 
+                        ? 'bg-gray-100 p-4' 
+                        : 'bg-gradient-to-br from-blue-50 to-purple-50'
+                    }`}
+                    style={{
+                      backgroundImage: previewMode === 'desktop' 
+                        ? 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%239C92AC" fill-opacity="0.1"%3E%3Ccircle cx="30" cy="30" r="3"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")'
+                        : undefined
+                    }}
+                  />
+                )}
                 
-                {previewMode === 'desktop' && (
+                {/* Overlay chatbot widget */}
+                <div className="absolute bottom-4 right-4 z-10">
+                  <ToggleableChatbot
+                    config={previewConfig}
+                    position={uiConfig.position as any}
+                    autoOpen={false}
+                    className="relative"
+                    previewMode={previewMode}
+                  />
+                </div>
+                
+                {previewMode === 'desktop' && !chatbot.config?.company?.website && (
                   <div className="absolute top-4 left-4 text-sm text-gray-600 bg-white/80 backdrop-blur-sm rounded px-2 py-1">
-                    Desktop Preview
+                    Desktop Preview (Add website URL for live embedding)
+                  </div>
+                )}
+                
+                {previewMode === 'desktop' && chatbot.config?.company?.website && (
+                  <div className="absolute top-4 left-4 text-sm text-gray-600 bg-white/80 backdrop-blur-sm rounded px-2 py-1">
+                    Live Website Preview
                   </div>
                 )}
               </div>
@@ -493,7 +520,19 @@ export default function EnhancedUICustomization({ chatbot }: EnhancedUICustomiza
       {/* Fullscreen Preview Modal */}
       {isFullscreenPreview && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm">
-          <div className="fixed inset-0 bg-gradient-to-br from-blue-50 to-purple-50">
+          <div className="fixed inset-0">
+            {/* Embedded website iframe for fullscreen */}
+            {chatbot.config?.company?.website ? (
+              <iframe
+                src={chatbot.config.company.website}
+                className="w-full h-full border-0"
+                title="Fullscreen Website Preview"
+                sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-blue-50 to-purple-50" />
+            )}
+            
             {/* Close Button */}
             <Button
               variant="outline"
@@ -505,8 +544,8 @@ export default function EnhancedUICustomization({ chatbot }: EnhancedUICustomiza
               Exit Fullscreen
             </Button>
             
-            {/* Fullscreen Preview */}
-            <div className="relative w-full h-full overflow-hidden">
+            {/* Fullscreen Chatbot Widget */}
+            <div className="absolute bottom-4 right-4 z-10">
               <ToggleableChatbot
                 config={previewConfig}
                 position={uiConfig.position as any}
@@ -514,10 +553,10 @@ export default function EnhancedUICustomization({ chatbot }: EnhancedUICustomiza
                 className="relative"
                 previewMode="fullscreen"
               />
+            </div>
               
-              <div className="absolute top-4 left-4 text-sm text-gray-600 bg-white/80 backdrop-blur-sm rounded px-3 py-2">
-                Fullscreen Preview - {previewConfig.businessName}
-              </div>
+            <div className="absolute top-4 left-4 text-sm text-gray-600 bg-white/80 backdrop-blur-sm rounded px-3 py-2">
+              {chatbot.config?.company?.website ? 'Live' : 'Mock'} Fullscreen Preview - {previewConfig.businessName}
             </div>
           </div>
         </div>

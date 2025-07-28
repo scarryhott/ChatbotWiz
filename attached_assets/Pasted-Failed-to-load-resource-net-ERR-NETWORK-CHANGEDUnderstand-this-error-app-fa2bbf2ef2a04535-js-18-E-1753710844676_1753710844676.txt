@@ -1,0 +1,33 @@
+Failed to load resource: net::ERR_NETWORK_CHANGEDUnderstand this error
+_app-fa2bbf2ef2a04535.js:18 Error sending segment performance metrics TypeError: Failed to fetch
+    at _app-fa2bbf2ef2a04535.js:18:9046
+    at _app-fa2bbf2ef2a04535.js:6:111287
+    at o (_app-fa2bbf2ef2a04535.js:20:361485)
+    at o (sdk.min.js:1:23763)
+    at t.<anonymous> (remote-metrics.ts:138:12)
+    at tslib.es6.js:103:23
+    at Object.next (tslib.es6.js:108:37)
+    at tslib.es6.js:80:8
+    at new Promise (<anonymous>)
+    at u (tslib.es6.js:72:27)
+    at t.send (sdk.min.js:1:22021)
+    at t.<anonymous> (remote-metrics.ts:125:16)
+    at tslib.es6.js:103:23
+    at Object.next (tslib.es6.js:108:37)
+    at tslib.es6.js:80:8
+    at new Promise (<anonymous>)
+    at u (tslib.es6.js:72:27)
+    at t.flush (sdk.min.js:1:21754)
+    at l (remote-metrics.ts:83:14)
+    at n (_app-fa2bbf2ef2a04535.js:18:2959)
+(anonymous) @ _app-fa2bbf2ef2a04535.js:18Understand this error
+analytics.google.com/g/collect?v=2&tid=G-MPJY3F1YEL&gtm=45je57n0v9135634466za200&_p=1753709747940&gcd=13l3l3l3l2l1&npa=0&dma=0&tag_exp=101509157~103116026~103200004~103233427~104684208~104684211~104948813~105134979~105134981&ul=en-us&sr=1470x956&cid=513652516.1751242955&ecid=468022397&ir=1&uaa=arm&uab=64&uafvl=Not)A%253BBrand%3B8.0.0.0%7CChromium%3B138.0.7204.169%7CGoogle%2520Chrome%3B138.0.7204.169&uamb=0&uam=&uap=macOS&uapv=14.5.0&uaw=0&are=1&frm=0&pscdl=noapi&_eu=EBAIAAQ&dl=https%3A%2F%2Freplit.com%2F~&dp=%2F%40HarryScott6%2FChatbotWiz&dt=replEnvironmentDesktop&sid=1753709749&sct=9&seg=1&_tu=wAQ&_s=11&tfd=193562:1  Failed to load resource: net::ERR_INTERNET_DISCONNECTEDUnderstand this error
+/_next/data/replit.com--iKuG_w_QI-VZ4If6nzksH/languages/python3.json:1  Failed to load resource: the server responded with a status of 404 ()Understand this error
+/_next/data/replit.com--iKuG_w_QI-VZ4If6nzksH/languages/javascript.json:1  Failed to load resource: the server responded with a status of 404 ()Understand this error
+/_next/data/replit.com--iKuG_w_QI-VZ4If6nzksH/languages/typescript.json:1  Failed to load resource: the server responded with a status of 404 ()Understand this error
+/_next/data/replit.com--iKuG_w_QI-VZ4If6nzksH/languages/nix.json:1  Failed to load resource: the server responded with a status of 404 ()Understand this error
+/_next/data/replit.com--iKuG_w_QI-VZ4If6nzksH/languages/nodejs.json:1  Failed to load resource: the server responded with a status of 404 ()Understand this error
+/_next/data/replit.com--iKuG_w_QI-VZ4If6nzksH/languages/go.json:1  Failed to load resource: the server responded with a status of 404 ()Understand this error
+/_next/data/replit.com--iKuG_w_QI-VZ4If6nzksH/languages/cpp.json:1  Failed to load resource: the server responded with a status of 404 ()Understand this error
+/_next/data/replit.com--iKuG_w_QI-VZ4If6nzksH/languages/html.json:1  Failed to load resource: the server responded with a status of 404 ()Understand this error
+workspace_iframe.html:32 
