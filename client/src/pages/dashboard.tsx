@@ -128,19 +128,37 @@ export default function Dashboard() {
                     This is how your chatbot will appear on your website. You can interact with it to test the 5W flow.
                   </p>
                   {selectedChatbot && (
-                    <div className="relative bg-gray-100 rounded-lg p-8 min-h-96">
-                      {/* Mock website background */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-lg opacity-50"></div>
-                      <div className="relative">
-                        <div className="mb-4 p-4 bg-white rounded shadow-sm">
-                          <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                          <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                        </div>
-                        <div className="mb-4 p-4 bg-white rounded shadow-sm">
-                          <div className="h-32 bg-gray-200 rounded mb-2"></div>
-                          <div className="h-3 bg-gray-200 rounded w-full mb-1"></div>
-                          <div className="h-3 bg-gray-200 rounded w-2/3"></div>
-                        </div>
+                    <div className="relative bg-white rounded-lg border min-h-96 overflow-hidden">
+                      {/* Embedded website iframe */}
+                      <iframe
+                        src={selectedChatbot.config?.company?.website || "https://www.replit.com"}
+                        className="w-full h-96 border-0"
+                        title="Live Website Preview"
+                        sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+                        onError={(e) => {
+                          console.log("Website failed to load, using fallback");
+                          // Fallback to Replit if the website fails to load
+                          const iframe = e.target as HTMLIFrameElement;
+                          if (iframe && iframe.src !== "https://www.replit.com") {
+                            iframe.src = "https://www.replit.com";
+                          }
+                        }}
+                      />
+                      
+                      {/* Overlay chatbot widget on the website */}
+                      <div className="absolute bottom-4 right-4 z-10">
+                        <ToggleableChatbot 
+                          config={adaptChatbotConfig(selectedChatbot)}
+                          onLeadUpdate={(leadData) => {
+                            console.log("Preview lead captured:", leadData);
+                          }}
+                          onConversationUpdate={(messages) => {
+                            console.log("Preview conversation updated:", messages);
+                          }}
+                          position="bottom-right"
+                          autoOpen={false}
+                          previewMode="desktop"
+                        />
                       </div>
                     </div>
                   )}
