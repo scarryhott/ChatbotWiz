@@ -461,23 +461,7 @@ export function EnhancedChatbot({
         fontSize: sizeStyles.fontSize
       }}
     >
-      {/* Header - Scalable height */}
-      <div 
-        className={`${sizeStyles.headerPadding} text-white text-center ${sizeStyles.headerHeight} flex flex-col justify-center`}
-        style={{ 
-          background: `linear-gradient(135deg, ${config.ui.theme.primaryColor}, ${config.ui.theme.secondaryColor})`
-        }}
-      >
-        <div className="flex items-center justify-center gap-2">
-          <div 
-            className={`${widgetSize === 'small' ? 'w-6 h-6' : widgetSize === 'large' || widgetSize === 'fullscreen' ? 'w-10 h-10' : 'w-8 h-8'} rounded-full flex items-center justify-center ${sizeStyles.messageSize}`}
-            style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}
-          >
-            🤖
-          </div>
-          <h1 className={`${sizeStyles.messageSize} font-semibold`}>{businessInfo.name}</h1>
-        </div>
-      </div>
+
 
       {/* Topic Tabs - Scalable */}
       {config.ui.showTabs && (
