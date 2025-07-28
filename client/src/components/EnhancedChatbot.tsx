@@ -477,10 +477,10 @@ export function EnhancedChatbot({
           </div>
           <h1 className={`${sizeStyles.messageSize} font-semibold`}>{businessInfo.name}</h1>
         </div>
-        <p className="text-xs opacity-90">{businessInfo.services} - {businessInfo.location}</p>
+        <p className={`${widgetSize === 'small' ? 'text-xs' : sizeStyles.messageSize} opacity-90`}>{businessInfo.services} - {businessInfo.location}</p>
       </div>
 
-      {/* Topic Tabs */}
+      {/* Topic Tabs - Scalable */}
       {config.ui.showTabs && (
         <div className="flex bg-gray-50 border-b overflow-x-auto">
           {topics.map((topic) => {
@@ -494,7 +494,7 @@ export function EnhancedChatbot({
                 key={topic.id}
                 onClick={() => handleTabClick(topic.id)}
                 className={cn(
-                  "flex flex-col items-center p-3 min-w-[80px] transition-all border-b-2",
+                  `flex flex-col items-center ${sizeStyles.messagePadding} ${widgetSize === 'small' ? 'min-w-[60px]' : widgetSize === 'large' || widgetSize === 'fullscreen' ? 'min-w-[100px]' : 'min-w-[80px]'} transition-all border-b-2`,
                   isActive 
                     ? "border-blue-500 bg-blue-50 text-blue-600"
                     : "border-transparent hover:bg-gray-100"
@@ -502,12 +502,12 @@ export function EnhancedChatbot({
               >
                 <div className="relative">
                   {isCompleted ? (
-                    <div className="w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center">
-                      <Check size={14} />
+                    <div className={`${widgetSize === 'small' ? 'w-4 h-4' : widgetSize === 'large' || widgetSize === 'fullscreen' ? 'w-8 h-8' : 'w-6 h-6'} bg-green-500 text-white rounded-full flex items-center justify-center`}>
+                      <Check size={widgetSize === 'small' ? 10 : widgetSize === 'large' || widgetSize === 'fullscreen' ? 18 : 14} />
                     </div>
                   ) : (
                     <Icon 
-                      size={18} 
+                      size={widgetSize === 'small' ? 14 : widgetSize === 'large' || widgetSize === 'fullscreen' ? 22 : 18} 
                       className={cn(
                         "transition-colors",
                         isActive ? "text-blue-600" : "text-gray-600"
@@ -515,16 +515,16 @@ export function EnhancedChatbot({
                     />
                   )}
                 </div>
-                <span className="text-xs font-medium mt-1">{topic.title}</span>
+                <span className={`${widgetSize === 'small' ? 'text-xs' : sizeStyles.messageSize} font-medium mt-1`}>{topic.title}</span>
               </button>
             );
           })}
         </div>
       )}
 
-      {/* Messages Area */}
-      <ScrollArea className="flex-1 p-4">
-        <div className="space-y-4">
+      {/* Messages Area - Scalable */}
+      <ScrollArea className={`flex-1 ${sizeStyles.messagePadding}`}>
+        <div className={`${widgetSize === 'small' ? 'space-y-2' : widgetSize === 'large' || widgetSize === 'fullscreen' ? 'space-y-6' : 'space-y-4'}`}>
           {currentMessages.map((message) => (
             <div
               key={message.id}
