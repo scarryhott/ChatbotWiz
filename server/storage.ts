@@ -397,7 +397,7 @@ export class DatabaseStorage implements IStorage {
       // Update existing lead with new extracted info and completed topic
       const lead = existingLead[0];
       const updatedExtractedInfo = { ...lead.extractedInfo, ...data.extractedInfo };
-      const updatedCompletedTopics = Array.from(new Set([...lead.completedTopics, data.topic]));
+      const updatedCompletedTopics = Array.from(new Set([...(lead.completedTopics || []), data.topic]));
       
       // Update 5W progress based on completed topics
       const updatedFiveWProgress = { ...lead.fiveWProgress };
@@ -413,7 +413,13 @@ export class DatabaseStorage implements IStorage {
           extractedInfo: updatedExtractedInfo,
           completedTopics: updatedCompletedTopics,
           fiveWProgress: updatedFiveWProgress,
-          conversationHistory: data.conversationHistory,
+          conversationHistory: data.conversationHistory.map(msg => ({
+            id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            type: msg.role === 'user' ? 'user' as const : 'bot' as const,
+            content: msg.content,
+            timestamp: msg.timestamp || new Date().toISOString(),
+            topic: data.topic
+          })),
           currentTopic: data.topic,
           name: data.extractedInfo.name || lead.name,
           email: data.extractedInfo.email || lead.email,
@@ -454,7 +460,13 @@ export class DatabaseStorage implements IStorage {
           fiveWProgress,
           extractedInfo: data.extractedInfo,
           completedTopics: [data.topic],
-          conversationHistory: data.conversationHistory,
+          conversationHistory: data.conversationHistory.map(msg => ({
+            id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            type: msg.role === 'user' ? 'user' as const : 'bot' as const,
+            content: msg.content,
+            timestamp: msg.timestamp || new Date().toISOString(),
+            topic: data.topic
+          })),
           currentTopic: data.topic,
           isCompleted: false
         })

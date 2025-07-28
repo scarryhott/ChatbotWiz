@@ -82,18 +82,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // If topic is complete (green checkmark), save/update lead information
       if (response.isTopicComplete && sessionId && chatbotId) {
+        console.log('Topic completed! Saving lead for session:', sessionId, 'topic:', topic, 'extractedInfo:', response.extractedInfo);
         try {
-          await storage.saveLeadFromSession({
+          const savedLead = await storage.saveLeadFromSession({
             chatbotId,
             sessionId,
             topic,
             extractedInfo: response.extractedInfo || {},
             conversationHistory: conversationHistory || []
           });
+          console.log('Lead saved successfully:', savedLead.id);
         } catch (leadError) {
           console.error('Error saving lead from session:', leadError);
           // Don't fail the chat response if lead saving fails
         }
+      } else {
+        console.log('Topic not completed or missing session info:', {
+          isTopicComplete: response.isTopicComplete,
+          hasSessionId: !!sessionId,
+          hasChatbotId: !!chatbotId,
+          extractedInfo: response.extractedInfo
+        });
       }
       
       res.json({ message: response.message, nextTopic: response.nextTopic, isTopicComplete: response.isTopicComplete });
