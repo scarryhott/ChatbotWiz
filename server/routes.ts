@@ -71,7 +71,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Chat response API for real-time AI responses
   app.post("/api/chat/response", async (req, res) => {
     try {
-      const { message, topic, businessInfo, conversationHistory } = req.body;
+      const { message, topic, businessInfo, conversationHistory, chatbotId, sessionId } = req.body;
       
       const response = await generateChatResponse({
         userMessage: message,
@@ -79,6 +79,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         businessInfo: businessInfo,
         conversationHistory: conversationHistory || []
       });
+      
+      // If topic is complete (green checkmark), save/update lead information
+      if (response.isTopicComplete && sessionId && chatbotId) {
+        try {
+          await storage.saveLeadFromSession({
+            chatbotId,
+            sessionId,
+            topic,
+            extractedInfo: response.extractedInfo || {},
+            conversationHistory: conversationHistory || []
+          });
+        } catch (leadError) {
+          console.error('Error saving lead from session:', leadError);
+          // Don't fail the chat response if lead saving fails
+        }
+      }
       
       res.json({ message: response.message, nextTopic: response.nextTopic, isTopicComplete: response.isTopicComplete });
     } catch (error) {

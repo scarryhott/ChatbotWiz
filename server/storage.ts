@@ -26,6 +26,15 @@ export interface IStorage {
   getTopicCompletions(userId: string, leadId: string): Promise<TopicCompletion[]>;
   createTopicCompletion(topic: InsertTopicCompletion): Promise<TopicCompletion>;
   updateTopicCompletion(id: string, updates: Partial<InsertTopicCompletion>): Promise<TopicCompletion>;
+
+  // Session-based lead capture (for non-logged users)
+  saveLeadFromSession(data: {
+    chatbotId: string;
+    sessionId: string;
+    topic: string;
+    extractedInfo: Record<string, any>;
+    conversationHistory: Array<{role: 'user' | 'assistant', content: string, timestamp?: string}>;
+  }): Promise<Lead>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -364,6 +373,95 @@ export class DatabaseStorage implements IStorage {
       .where(eq(topicCompletions.id, id))
       .returning();
     return topic;
+  }
+
+  // Save lead information when green checkmark appears, based on session ID
+  async saveLeadFromSession(data: {
+    chatbotId: string;
+    sessionId: string;
+    topic: string;
+    extractedInfo: Record<string, any>;
+    conversationHistory: Array<{role: 'user' | 'assistant', content: string, timestamp?: string}>;
+  }): Promise<Lead> {
+    // Check if lead already exists for this session
+    const existingLead = await db
+      .select()
+      .from(leads)
+      .where(and(
+        eq(leads.chatbotId, data.chatbotId),
+        eq(leads.sessionId, data.sessionId)
+      ))
+      .limit(1);
+
+    if (existingLead.length > 0) {
+      // Update existing lead with new extracted info and completed topic
+      const lead = existingLead[0];
+      const updatedExtractedInfo = { ...lead.extractedInfo, ...data.extractedInfo };
+      const updatedCompletedTopics = Array.from(new Set([...lead.completedTopics, data.topic]));
+      
+      // Update 5W progress based on completed topics
+      const updatedFiveWProgress = { ...lead.fiveWProgress };
+      if (data.topic === 'why') updatedFiveWProgress.why = { completed: true, value: data.extractedInfo.why || '' };
+      if (data.topic === 'what') updatedFiveWProgress.what = { completed: true, value: data.extractedInfo.what || '' };
+      if (data.topic === 'when') updatedFiveWProgress.when = { completed: true, value: data.extractedInfo.when || '' };
+      if (data.topic === 'where') updatedFiveWProgress.where = { completed: true, value: data.extractedInfo.where || '' };
+      if (data.topic === 'who') updatedFiveWProgress.who = { completed: true, value: data.extractedInfo.who || '' };
+
+      const [updatedLead] = await db
+        .update(leads)
+        .set({
+          extractedInfo: updatedExtractedInfo,
+          completedTopics: updatedCompletedTopics,
+          fiveWProgress: updatedFiveWProgress,
+          conversationHistory: data.conversationHistory,
+          currentTopic: data.topic,
+          name: data.extractedInfo.name || lead.name,
+          email: data.extractedInfo.email || lead.email,
+          phone: data.extractedInfo.phone || lead.phone,
+          company: data.extractedInfo.company || lead.company,
+          updatedAt: new Date()
+        })
+        .where(eq(leads.id, lead.id))
+        .returning();
+
+      return updatedLead;
+    } else {
+      // Create new lead for this session
+      const fiveWProgress = {
+        why: { completed: false, value: '' },
+        what: { completed: false, value: '' },
+        when: { completed: false, value: '' },
+        where: { completed: false, value: '' },
+        who: { completed: false, value: '' }
+      };
+
+      // Mark the current topic as completed
+      if (data.topic === 'why') fiveWProgress.why = { completed: true, value: data.extractedInfo.why || '' };
+      if (data.topic === 'what') fiveWProgress.what = { completed: true, value: data.extractedInfo.what || '' };
+      if (data.topic === 'when') fiveWProgress.when = { completed: true, value: data.extractedInfo.when || '' };
+      if (data.topic === 'where') fiveWProgress.where = { completed: true, value: data.extractedInfo.where || '' };
+      if (data.topic === 'who') fiveWProgress.who = { completed: true, value: data.extractedInfo.who || '' };
+
+      const [newLead] = await db
+        .insert(leads)
+        .values({
+          chatbotId: data.chatbotId,
+          sessionId: data.sessionId,
+          name: data.extractedInfo.name || null,
+          email: data.extractedInfo.email || null,
+          phone: data.extractedInfo.phone || null,
+          company: data.extractedInfo.company || null,
+          fiveWProgress,
+          extractedInfo: data.extractedInfo,
+          completedTopics: [data.topic],
+          conversationHistory: data.conversationHistory,
+          currentTopic: data.topic,
+          isCompleted: false
+        })
+        .returning();
+
+      return newLead;
+    }
   }
 }
 

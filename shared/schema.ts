@@ -38,14 +38,18 @@ export const chatbots = pgTable("chatbots", {
 export const leads = pgTable("leads", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   chatbotId: varchar("chatbot_id").notNull().references(() => chatbots.id),
+  sessionId: varchar("session_id").notNull(), // Session ID for tracking non-logged users
   name: text("name"),
   email: text("email"),
   phone: text("phone"),
+  company: text("company"),
   fiveWProgress: jsonb("five_w_progress").$type<FiveWProgress>().notNull(),
   specificRequests: text("specific_requests"), // Added for capturing user's specific needs
   contextSummary: text("context_summary"),
   conversationHistory: jsonb("conversation_history").$type<ConversationMessage[]>().default([]),
   currentTopic: text("current_topic").default("why"), // Track which topic user is on
+  extractedInfo: jsonb("extracted_info").$type<Record<string, any>>().default({}), // Info extracted when green checkmark appears
+  completedTopics: jsonb("completed_topics").$type<Array<string>>().default([]), // Topics that got green checkmarks
   isCompleted: boolean("is_completed").default(false),
   createdAt: timestamp("created_at").default(sql`now()`),
   updatedAt: timestamp("updated_at").default(sql`now()`),
@@ -116,11 +120,11 @@ export interface ChatbotConfig {
 }
 
 export interface FiveWProgress {
-  why: { completed: boolean; answer?: string };
-  what: { completed: boolean; answer?: string };
-  when: { completed: boolean; answer?: string };
-  where: { completed: boolean; answer?: string };
-  who: { completed: boolean; answer?: string };
+  why: { completed: boolean; value?: string };
+  what: { completed: boolean; value?: string };
+  when: { completed: boolean; value?: string };
+  where: { completed: boolean; value?: string };
+  who: { completed: boolean; value?: string };
 }
 
 export interface ConversationMessage {

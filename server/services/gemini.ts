@@ -21,6 +21,7 @@ export interface ChatResponse {
   isTopicComplete: boolean;
   quickReplies?: string[];
   shouldEndConversation: boolean;
+  extractedInfo?: Record<string, any>; // Information extracted when topic is completed
 }
 
 export async function analyzeWebsiteContent(content: string): Promise<WebsiteAnalysis> {
@@ -285,12 +286,20 @@ Set isTopicComplete=true and suggest nextTopic when:
     const rawJson = response.text;
     if (rawJson) {
       const parsedResponse = JSON.parse(rawJson);
+      
+      // Extract information when topic is complete
+      let extractedInfo: Record<string, any> = {};
+      if (parsedResponse.isTopicComplete) {
+        extractedInfo = await extractTopicInformation(userMessage, currentTopic, parsedResponse.message, conversationHistory);
+      }
+      
       return {
         message: parsedResponse.message,
         nextTopic: parsedResponse.nextTopic,
         isTopicComplete: parsedResponse.isTopicComplete || false,
         quickReplies: parsedResponse.quickReplies || [],
-        shouldEndConversation: parsedResponse.shouldEndConversation || false
+        shouldEndConversation: parsedResponse.shouldEndConversation || false,
+        extractedInfo: parsedResponse.isTopicComplete ? extractedInfo : undefined
       };
     } else {
       throw new Error("Empty response from Gemini");
@@ -302,6 +311,137 @@ Set isTopicComplete=true and suggest nextTopic when:
       isTopicComplete: false,
       shouldEndConversation: false
     };
+  }
+}
+
+// Extract specific information when a topic is completed
+async function extractTopicInformation(
+  userMessage: string, 
+  topic: string, 
+  aiResponse: string, 
+  conversationHistory: any[]
+): Promise<Record<string, any>> {
+  try {
+    const extractionPrompt = `Extract relevant information from the conversation for the ${topic.toUpperCase()} topic.
+
+Conversation context:
+${conversationHistory.slice(-3).map((msg: any) => `${msg.role || msg.type}: ${msg.content}`).join('\n')}
+User: ${userMessage}
+Assistant: ${aiResponse}
+
+Based on this conversation, extract the following information for the ${topic} topic:
+
+${getExtractionSchema(topic)}
+
+Return a JSON object with the extracted information. If information is not available, use null.`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      config: {
+        systemInstruction: extractionPrompt,
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: "object",
+          properties: getExtractionProperties(topic),
+          additionalProperties: true
+        }
+      },
+      contents: `Extract information for ${topic} topic from the conversation above.`
+    });
+
+    const rawJson = response.text;
+    if (rawJson) {
+      return JSON.parse(rawJson);
+    }
+    return {};
+  } catch (error) {
+    console.error('Information extraction error:', error);
+    return {};
+  }
+}
+
+function getExtractionSchema(topic: string): string {
+  switch (topic.toLowerCase()) {
+    case 'why':
+      return `- motivation: Main reason for interest/inquiry
+- pain_points: Current challenges or problems
+- goals: What they want to achieve
+- urgency: How urgent their need is`;
+    case 'what':
+      return `- services_needed: Specific services or products they want
+- requirements: Technical or specific requirements
+- preferences: Preferences or specific needs
+- budget_range: Any budget information mentioned`;
+    case 'when':
+      return `- timeline: When they need service/solution
+- deadline: Any specific deadlines
+- availability: Their availability for scheduling
+- preferred_times: Specific times mentioned (with AM/PM if provided)`;
+    case 'where':
+      return `- location: Service location or address
+- service_area: Geographic area needing service
+- property_type: Type of property/building
+- accessibility: Any location-specific requirements`;
+    case 'who':
+      return `- name: Contact person's name
+- title: Job title or role
+- company: Company/organization name
+- email: Email address
+- phone: Phone number
+- decision_maker: Whether they make decisions`;
+    default:
+      return `- ${topic}: Relevant information for this topic`;
+  }
+}
+
+function getExtractionProperties(topic: string): Record<string, any> {
+  switch (topic.toLowerCase()) {
+    case 'why':
+      return {
+        motivation: { type: "string" },
+        pain_points: { type: "string" },
+        goals: { type: "string" },
+        urgency: { type: "string" },
+        why: { type: "string" }
+      };
+    case 'what':
+      return {
+        services_needed: { type: "string" },
+        requirements: { type: "string" },
+        preferences: { type: "string" },
+        budget_range: { type: "string" },
+        what: { type: "string" }
+      };
+    case 'when':
+      return {
+        timeline: { type: "string" },
+        deadline: { type: "string" },
+        availability: { type: "string" },
+        preferred_times: { type: "string" },
+        when: { type: "string" }
+      };
+    case 'where':
+      return {
+        location: { type: "string" },
+        service_area: { type: "string" },
+        property_type: { type: "string" },
+        accessibility: { type: "string" },
+        where: { type: "string" }
+      };
+    case 'who':
+      return {
+        name: { type: "string" },
+        title: { type: "string" },
+        company: { type: "string" },
+        email: { type: "string" },
+        phone: { type: "string" },
+        decision_maker: { type: "string" },
+        who: { type: "string" }
+      };
+    default:
+      return {
+        [topic]: { type: "string" }
+      };
   }
 }
 

@@ -124,6 +124,7 @@ export function EnhancedChatbot({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const userId = useRef(generateUserId());
+  const sessionId = useRef(`session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
 
   // Business info from config
   const businessInfo = {
@@ -250,7 +251,9 @@ export function EnhancedChatbot({
           message: userMessage,
           topic: topic,
           businessInfo: businessInfo,
-          conversationHistory: conversationHistory
+          conversationHistory: conversationHistory,
+          chatbotId: config.id || 'demo-chatbot-1',
+          sessionId: sessionId.current
         }),
       });
 
