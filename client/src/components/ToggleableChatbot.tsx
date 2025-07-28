@@ -204,46 +204,49 @@ export function ToggleableChatbot({
 
           {/* Chat Content */}
           {!isMinimized && (
-            <div className="h-full flex flex-col">
-              <EnhancedChatbot
-                config={{
-                  businessName: config.businessName || 'Assistant',
-                  location: config.location || 'Local area',
-                  services: config.services || 'Professional services',
-                  experience: 'Experienced professionals',
-                  specialties: 'Quality service',
-                  serviceAreas: config.location || 'Local area',
-                  industry: config.industry || 'service',
-                  phone: '',
-                  email: '',
-                  website: '',
-                  ui: {
-                    theme: {
-                      primaryColor: config.ui?.theme?.primaryColor || '#3b82f6',
-                      secondaryColor: config.ui?.theme?.secondaryColor || '#8b5cf6',
-                      textColor: config.ui?.theme?.textColor || '#1f2937',
-                      backgroundColor: config.ui?.theme?.backgroundColor || '#ffffff',
+            <div className="flex-1 flex flex-col overflow-hidden">
+              <div className="flex-1 overflow-hidden">
+                <EnhancedChatbot
+                  config={{
+                    businessName: config.businessName || 'Assistant',
+                    location: config.location || 'Local area',
+                    services: config.services || 'Professional services',
+                    experience: 'Experienced professionals',
+                    specialties: 'Quality service',
+                    serviceAreas: config.location || 'Local area',
+                    industry: config.industry || 'service',
+                    phone: '',
+                    email: '',
+                    website: '',
+                    ui: {
+                      theme: {
+                        primaryColor: config.ui?.theme?.primaryColor || '#3b82f6',
+                        secondaryColor: config.ui?.theme?.secondaryColor || '#8b5cf6',
+                        textColor: config.ui?.theme?.textColor || '#1f2937',
+                        backgroundColor: config.ui?.theme?.backgroundColor || '#ffffff',
+                      },
+                      position: 'bottom-right',
+                      animation: 'slide-up',
+                      showTabs: true,
+                      autoStart: false,
                     },
-                    position: 'bottom-right',
-                    animation: 'slide-up',
-                    showTabs: true,
-                    autoStart: false,
-                  },
-                  conversation: {
-                    topics: [],
-                    flow: '5W' as const,
-                    maxFollowUps: 3,
-                  },
-                  ai: {
-                    model: 'gemini-2.5-flash',
-                    provider: 'gemini',
-                    maxTokens: 500,
-                  }
-                }}
-                onLeadUpdate={onLeadUpdate}
-                onConversationUpdate={handleConversationUpdate}
-                className="flex-1 border-0 rounded-none"
-              />
+                    conversation: {
+                      topics: [],
+                      flow: '5W' as const,
+                      maxFollowUps: 3,
+                    },
+                    ai: {
+                      model: 'gemini-2.5-flash',
+                      provider: 'gemini',
+                      maxTokens: 500,
+                    }
+                  }}
+                  onLeadUpdate={onLeadUpdate}
+                  onConversationUpdate={handleConversationUpdate}
+                  className="h-full w-full border-0 rounded-none"
+                  widgetSize={config.ui?.size || 'medium'}
+                />
+              </div>
             </div>
           )}
         </Card>

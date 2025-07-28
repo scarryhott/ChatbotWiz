@@ -76,6 +76,7 @@ interface EnhancedChatbotProps {
   onConversationUpdate?: (messages: ConversationMessage[]) => void;
   className?: string;
   style?: React.CSSProperties;
+  widgetSize?: 'small' | 'medium' | 'large' | 'fullscreen';
 }
 
 const generateMessageId = () => `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -86,7 +87,8 @@ export function EnhancedChatbot({
   onLeadUpdate, 
   onConversationUpdate,
   className,
-  style 
+  style,
+  widgetSize = 'medium'
 }: EnhancedChatbotProps) {
   // Core state management
   const [messages, setMessages] = useState<ConversationMessage[]>([]);
@@ -398,29 +400,82 @@ export function EnhancedChatbot({
   const lastMessage = currentMessages[currentMessages.length - 1];
   const showQuickReplies = lastMessage?.type === 'bot' && lastMessage.quickReplies;
 
+  // Get size-specific styles for content scaling
+  const getSizeStyles = () => {
+    switch (widgetSize) {
+      case 'small':
+        return {
+          fontSize: '12px',
+          headerPadding: 'p-2',
+          messagePadding: 'p-2',
+          inputPadding: 'p-2',
+          headerHeight: 'h-10',
+          messageSize: 'text-xs',
+          inputSize: 'text-xs',
+          buttonSize: 'text-xs px-2 py-1'
+        };
+      case 'large':
+        return {
+          fontSize: '16px',
+          headerPadding: 'p-4',
+          messagePadding: 'p-4',
+          inputPadding: 'p-4',
+          headerHeight: 'h-16',
+          messageSize: 'text-base',
+          inputSize: 'text-base',
+          buttonSize: 'text-sm px-4 py-2'
+        };
+      case 'fullscreen':
+        return {
+          fontSize: '18px',
+          headerPadding: 'p-6',
+          messagePadding: 'p-6',
+          inputPadding: 'p-6',
+          headerHeight: 'h-20',
+          messageSize: 'text-lg',
+          inputSize: 'text-lg',
+          buttonSize: 'text-base px-6 py-3'
+        };
+      default: // medium
+        return {
+          fontSize: '14px',
+          headerPadding: 'p-3',
+          messagePadding: 'p-3',
+          inputPadding: 'p-3',
+          headerHeight: 'h-12',
+          messageSize: 'text-sm',
+          inputSize: 'text-sm',
+          buttonSize: 'text-sm px-3 py-2'
+        };
+    }
+  };
+
+  const sizeStyles = getSizeStyles();
+
   return (
     <Card 
       className={cn("flex flex-col h-full bg-white overflow-hidden", className)}
       style={{
         ...style,
-        borderColor: config.ui.theme.primaryColor
+        borderColor: config.ui.theme.primaryColor,
+        fontSize: sizeStyles.fontSize
       }}
     >
-      {/* Header - Reduced height */}
+      {/* Header - Scalable height */}
       <div 
-        className="p-3 text-white text-center"
+        className={`${sizeStyles.headerPadding} text-white text-center ${sizeStyles.headerHeight} flex flex-col justify-center`}
         style={{ 
           background: `linear-gradient(135deg, ${config.ui.theme.primaryColor}, ${config.ui.theme.secondaryColor})`
         }}
       >
-        <div className="flex items-center justify-center gap-2 mb-1">
+        <div className="flex items-center justify-center gap-2">
           <div 
-            className="w-8 h-8 rounded-full flex items-center justify-center text-lg"
+            className={`${widgetSize === 'small' ? 'w-6 h-6' : widgetSize === 'large' || widgetSize === 'fullscreen' ? 'w-10 h-10' : 'w-8 h-8'} rounded-full flex items-center justify-center ${sizeStyles.messageSize}`}
             style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}
           >
             🤖
           </div>
-          <h1 className="text-base font-semibold">{businessInfo.name}</h1>
+          <h1 className={`${sizeStyles.messageSize} font-semibold`}>{businessInfo.name}</h1>
         </div>
         <p className="text-xs opacity-90">{businessInfo.services} - {businessInfo.location}</p>
       </div>
@@ -480,25 +535,25 @@ export function EnhancedChatbot({
             >
               <div
                 className={cn(
-                  "max-w-[80%] p-3 rounded-lg",
+                  `max-w-[80%] ${sizeStyles.messagePadding} rounded-lg`,
                   message.type === 'user'
                     ? "text-white"
                     : "bg-gray-100 text-gray-800"
                 )}
                 style={message.type === 'user' ? { backgroundColor: config.ui.theme.primaryColor } : {}}
               >
-                <p className="text-sm leading-relaxed">{message.content}</p>
+                <p className={`${sizeStyles.messageSize} leading-relaxed`}>{message.content}</p>
               </div>
             </div>
           ))}
           
           {isTyping && (
             <div className="flex justify-start">
-              <div className="bg-gray-100 p-3 rounded-lg">
+              <div className={`bg-gray-100 ${sizeStyles.messagePadding} rounded-lg`}>
                 <div className="flex space-x-1">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+                  <div className={`${widgetSize === 'small' ? 'w-1.5 h-1.5' : widgetSize === 'large' || widgetSize === 'fullscreen' ? 'w-3 h-3' : 'w-2 h-2'} bg-gray-400 rounded-full animate-bounce`} />
+                  <div className={`${widgetSize === 'small' ? 'w-1.5 h-1.5' : widgetSize === 'large' || widgetSize === 'fullscreen' ? 'w-3 h-3' : 'w-2 h-2'} bg-gray-400 rounded-full animate-bounce`} style={{ animationDelay: '0.1s' }} />
+                  <div className={`${widgetSize === 'small' ? 'w-1.5 h-1.5' : widgetSize === 'large' || widgetSize === 'fullscreen' ? 'w-3 h-3' : 'w-2 h-2'} bg-gray-400 rounded-full animate-bounce`} style={{ animationDelay: '0.2s' }} />
                 </div>
               </div>
             </div>
@@ -508,17 +563,17 @@ export function EnhancedChatbot({
         </div>
       </ScrollArea>
 
-      {/* Quick Replies */}
+      {/* Quick Replies - Scalable */}
       {showQuickReplies && (
-        <div className="px-4 pb-2">
-          <div className="flex flex-wrap gap-2">
+        <div className={`px-4 pb-2`}>
+          <div className="flex flex-wrap gap-1">
             {lastMessage.quickReplies?.map((reply, index) => (
               <Button
                 key={index}
                 variant="outline"
                 size="sm"
                 onClick={() => handleQuickReply(reply)}
-                className="text-xs"
+                className={`${sizeStyles.buttonSize}`}
                 style={{ borderColor: config.ui.theme.primaryColor, color: config.ui.theme.primaryColor }}
               >
                 {reply}
@@ -528,8 +583,8 @@ export function EnhancedChatbot({
         </div>
       )}
 
-      {/* Input Area */}
-      <div className="p-4 border-t bg-gray-50">
+      {/* Input Area - Scalable */}
+      <div className={`${sizeStyles.inputPadding} border-t bg-gray-50`}>
         <div className="flex space-x-2">
           <Input
             ref={inputRef}
@@ -538,15 +593,16 @@ export function EnhancedChatbot({
             onKeyPress={handleKeyPress}
             placeholder="Type your message here..."
             disabled={isProcessing}
-            className="flex-1"
+            className={`flex-1 ${sizeStyles.inputSize}`}
           />
           <Button
             onClick={handleSendMessage}
             disabled={!currentMessage.trim() || isProcessing}
             size="sm"
+            className={`${sizeStyles.buttonSize}`}
             style={{ backgroundColor: config.ui.theme.primaryColor }}
           >
-            <Send size={16} />
+            <Send size={widgetSize === 'small' ? 12 : widgetSize === 'large' || widgetSize === 'fullscreen' ? 20 : 16} />
           </Button>
         </div>
       </div>
