@@ -157,6 +157,7 @@ export function ToggleableChatbot({
           ${config.ui?.size !== 'fullscreen' ? 'max-h-[80vh]' : ''}
           shadow-2xl border-0 ring-1 ring-gray-200
           animate-in slide-in-from-bottom-2
+          flex flex-col
         `}>
           {/* Header */}
           <div 

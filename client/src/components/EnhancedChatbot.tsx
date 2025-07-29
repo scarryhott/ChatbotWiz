@@ -482,7 +482,8 @@ export function EnhancedChatbot({
       style={{
         ...style,
         borderColor: config.ui.theme.primaryColor,
-        fontSize: sizeStyles.fontSize
+        fontSize: sizeStyles.fontSize,
+        position: 'relative'
       }}
     >
 
@@ -530,8 +531,9 @@ export function EnhancedChatbot({
       )}
 
       {/* Messages Area - Scalable */}
-      <ScrollArea className={`flex-1 ${sizeStyles.messagePadding} overflow-auto`} ref={scrollAreaRef}>
-        <div className={`${widgetSize === 'small' ? 'space-y-2' : widgetSize === 'large' || widgetSize === 'fullscreen' ? 'space-y-6' : 'space-y-4'} min-h-full`}>
+      <div className={`flex-1 overflow-hidden ${sizeStyles.messagePadding}`}>
+        <ScrollArea className="h-full" ref={scrollAreaRef}>
+          <div className={`${widgetSize === 'small' ? 'space-y-2' : widgetSize === 'large' || widgetSize === 'fullscreen' ? 'space-y-6' : 'space-y-4'} pb-4`}>
           {currentMessages.map((message) => (
             <div
               key={message.id}
@@ -566,14 +568,15 @@ export function EnhancedChatbot({
             </div>
           )}
           
-          {/* Invisible element to scroll to */}
-          <div 
-            ref={messagesEndRef} 
-            className="h-1 w-1" 
-            style={{ minHeight: '1px' }}
-          />
-        </div>
-      </ScrollArea>
+            {/* Invisible element to scroll to */}
+            <div 
+              ref={messagesEndRef} 
+              className="h-1 w-1" 
+              style={{ minHeight: '1px' }}
+            />
+          </div>
+        </ScrollArea>
+      </div>
 
       {/* Quick Replies - Scalable */}
       {showQuickReplies && (
@@ -596,7 +599,7 @@ export function EnhancedChatbot({
       )}
 
       {/* Input Area - Scalable */}
-      <div className={`${sizeStyles.inputPadding} border-t bg-gray-50`}>
+      <div className={`${sizeStyles.inputPadding} border-t bg-gray-50 flex-shrink-0`}>
         <div className="flex space-x-2">
           <Input
             ref={inputRef}
