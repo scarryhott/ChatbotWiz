@@ -214,12 +214,19 @@ export function EnhancedChatbot({
 
   // Auto-scroll to bottom when new messages are added
   useEffect(() => {
-    if (scrollAreaRef.current) {
-      const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
-      if (scrollContainer) {
-        scrollContainer.scrollTop = scrollContainer.scrollHeight;
+    const scrollToBottom = () => {
+      if (messagesEndRef.current) {
+        messagesEndRef.current.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'end',
+          inline: 'nearest'
+        });
       }
-    }
+    };
+    
+    // Small delay to ensure DOM is updated
+    const timer = setTimeout(scrollToBottom, 100);
+    return () => clearTimeout(timer);
   }, [chatAreaMessages, activeTab]);
 
   const startConversation = useCallback(() => {
@@ -523,8 +530,8 @@ export function EnhancedChatbot({
       )}
 
       {/* Messages Area - Scalable */}
-      <ScrollArea className={`flex-1 ${sizeStyles.messagePadding}`} ref={scrollAreaRef}>
-        <div className={`${widgetSize === 'small' ? 'space-y-2' : widgetSize === 'large' || widgetSize === 'fullscreen' ? 'space-y-6' : 'space-y-4'}`}>
+      <ScrollArea className={`flex-1 ${sizeStyles.messagePadding} overflow-auto`} ref={scrollAreaRef}>
+        <div className={`${widgetSize === 'small' ? 'space-y-2' : widgetSize === 'large' || widgetSize === 'fullscreen' ? 'space-y-6' : 'space-y-4'} min-h-full`}>
           {currentMessages.map((message) => (
             <div
               key={message.id}
@@ -559,7 +566,12 @@ export function EnhancedChatbot({
             </div>
           )}
           
-          <div ref={messagesEndRef} />
+          {/* Invisible element to scroll to */}
+          <div 
+            ref={messagesEndRef} 
+            className="h-1 w-1" 
+            style={{ minHeight: '1px' }}
+          />
         </div>
       </ScrollArea>
 
