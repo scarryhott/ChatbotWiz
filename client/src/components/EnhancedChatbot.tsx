@@ -420,12 +420,16 @@ export function EnhancedChatbot({
       // Get AI response
       const aiResponse = await callGeminiAPI(userMessage.content, activeTab);
       
-      // Switch topic FIRST if AI suggests it, then create response in new topic
+      // Switch topic based on AI suggestion - prioritize suggestedTab over nextTopic
       let responseTab = activeTab;
-      if (aiResponse.nextTopic && aiResponse.nextTopic !== activeTab) {
-        responseTab = aiResponse.nextTopic;
-        setActiveTab(aiResponse.nextTopic);
-        console.log(`LLM suggests switching from ${activeTab} to ${aiResponse.nextTopic}`);
+      const suggestedTab = aiResponse.nextTopic;
+      
+      if (suggestedTab && suggestedTab !== activeTab && ['WHY', 'WHAT', 'WHEN', 'WHERE', 'WHO'].includes(suggestedTab)) {
+        responseTab = suggestedTab;
+        setActiveTab(suggestedTab);
+        console.log(`AI suggests switching from ${activeTab} to ${suggestedTab} based on conversation context`);
+      } else {
+        console.log(`AI suggests staying on ${activeTab} tab`);
       }
       
       // Create bot response in the correct topic tab

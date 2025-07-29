@@ -105,7 +105,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      res.json({ message: response.message, nextTopic: response.nextTopic, isTopicComplete: response.isTopicComplete });
+      res.json({ 
+        message: response.message, 
+        nextTopic: response.nextTopic, 
+        suggestedTab: response.suggestedTab,
+        isTopicComplete: response.isTopicComplete 
+      });
     } catch (error) {
       console.error('Chat response error:', error);
       res.status(500).json({ message: "I apologize, but I'm having trouble processing your request right now. How can I help you today?" });
