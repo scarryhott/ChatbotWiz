@@ -190,7 +190,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         conversationHistory: conversationHistory || []
       });
 
-      res.json(response);
+      // Include suggested tab in response for intelligent switching
+      res.json({
+        ...response,
+        suggestedTab: response.suggestedTab || response.nextTopic || currentTopic
+      });
     } catch (error) {
       res.status(500).json({ message: "Failed to generate chat response", error: (error as Error).message });
     }

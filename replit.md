@@ -22,6 +22,7 @@ This is a full-stack TypeScript application for an AI-powered chatbot creation a
 ✓ **Comprehensive Lead Storage** - All conversation data, contact info, and 5W progress is captured and stored
 ✓ **AI Response Enhancement** - Made responses brief, concise, and dynamic to match user communication style
 ✓ **Data Validation System** - Added validation for timing (realistic dates), location (service area), and contact info (proper email/phone format)
+✓ **Intelligent Tab Switching** - LLM now determines which tab to switch to based on conversation context, not hardcoded logic
 
 ## User Preferences
 

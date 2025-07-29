@@ -202,14 +202,18 @@ Use "GIVE BEFORE TAKE" approach - provide value, information, and assistance bef
 - WHEN: Establish timeline (discuss availability, suggest optimal timing, capture specific times with AM/PM and dates when provided)
 - WHO: Collect contact info (ONLY after building trust and providing value)
 
-INTELLIGENT BEHAVIOR:
-1. Listen for natural topic transitions in user responses
-2. If user mentions location details, consider moving to WHERE topic
-3. If user mentions timing/urgency, consider moving to WHEN topic
-4. If user asks about services/solutions, move to WHAT topic
-5. Only move to WHO (contact collection) after user shows clear interest
-6. Always provide helpful information before asking questions
-7. Be conversational and adaptive, not rigid or form-like
+INTELLIGENT TAB SWITCHING:
+1. ALWAYS provide "suggestedTab" in your response based on conversation context
+2. Listen for natural topic transitions in user responses:
+   - If user mentions location/address/area details → suggestedTab: "WHERE"
+   - If user mentions timing/schedule/when/urgency → suggestedTab: "WHEN" 
+   - If user asks about services/solutions/what you offer → suggestedTab: "WHAT"
+   - If user shares problems/needs/motivations → suggestedTab: "WHY"
+   - If user provides contact info or asks how to reach you → suggestedTab: "WHO"
+3. Keep current tab if no clear transition signal
+4. Only move to WHO (contact collection) after user shows clear interest
+5. Always provide helpful information before asking questions
+6. Be conversational and adaptive, not rigid or form-like
 
 CONVERSATION STYLE - CRITICAL:
 - Keep responses BRIEF, CONCISE, and DYNAMIC - max 2-3 sentences unless explaining complex services
@@ -238,11 +242,12 @@ Current Topic: ${currentTopic} (but be flexible to move based on user responses)
           properties: {
             message: { type: "string" },
             nextTopic: { type: "string", enum: ["WHY", "WHAT", "WHEN", "WHERE", "WHO"] },
+            suggestedTab: { type: "string", enum: ["WHY", "WHAT", "WHEN", "WHERE", "WHO"] },
             isTopicComplete: { type: "boolean" },
             quickReplies: { type: "array", items: { type: "string" } },
             shouldEndConversation: { type: "boolean" }
           },
-          required: ["message", "isTopicComplete", "shouldEndConversation"]
+          required: ["message", "isTopicComplete", "shouldEndConversation", "suggestedTab"]
         }
       },
       contents: `

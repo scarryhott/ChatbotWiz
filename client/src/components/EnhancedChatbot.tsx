@@ -277,7 +277,7 @@ export function EnhancedChatbot({
       const data = await response.json();
       return {
         response: data.message || `I'd be happy to help with your ${topic.toLowerCase()} questions!`,
-        nextTopic: data.nextTopic,
+        nextTopic: data.suggestedTab || data.nextTopic,
         isComplete: data.isTopicComplete
       };
       
@@ -320,6 +320,7 @@ export function EnhancedChatbot({
       if (aiResponse.nextTopic && aiResponse.nextTopic !== activeTab) {
         responseTab = aiResponse.nextTopic;
         setActiveTab(aiResponse.nextTopic);
+        console.log(`LLM suggests switching from ${activeTab} to ${aiResponse.nextTopic}`);
       }
       
       // Create bot response in the correct topic tab
