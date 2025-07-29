@@ -123,6 +123,7 @@ export function EnhancedChatbot({
   // Refs
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
   const userId = useRef(generateUserId());
   const sessionId = useRef(`session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
 
@@ -210,6 +211,16 @@ export function EnhancedChatbot({
       onConversationUpdate(allMessages);
     }
   }, [chatAreaMessages, onConversationUpdate]);
+
+  // Auto-scroll to bottom when new messages are added
+  useEffect(() => {
+    if (scrollAreaRef.current) {
+      const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
+      if (scrollContainer) {
+        scrollContainer.scrollTop = scrollContainer.scrollHeight;
+      }
+    }
+  }, [chatAreaMessages, activeTab]);
 
   const startConversation = useCallback(() => {
     const welcomeMessage: ConversationMessage = {
@@ -511,7 +522,7 @@ export function EnhancedChatbot({
       )}
 
       {/* Messages Area - Scalable */}
-      <ScrollArea className={`flex-1 ${sizeStyles.messagePadding}`}>
+      <ScrollArea className={`flex-1 ${sizeStyles.messagePadding}`} ref={scrollAreaRef}>
         <div className={`${widgetSize === 'small' ? 'space-y-2' : widgetSize === 'large' || widgetSize === 'fullscreen' ? 'space-y-6' : 'space-y-4'}`}>
           {currentMessages.map((message) => (
             <div

@@ -44,6 +44,7 @@ export function ToggleableChatbot({
   const [isOpen, setIsOpen] = useState(autoOpen);
   const [isMinimized, setIsMinimized] = useState(false);
   const [hasNewMessage, setHasNewMessage] = useState(false);
+  const [conversationHistory, setConversationHistory] = useState<any[]>([]);
 
   const positionClasses = {
     'bottom-right': 'fixed bottom-4 right-4 z-50',
@@ -71,9 +72,16 @@ export function ToggleableChatbot({
   };
 
   const handleClose = () => {
+    // Save conversation history before closing
+    if (conversationHistory.length > 0 && chatbotId) {
+      console.log('Saving conversation history on close:', conversationHistory);
+      // The conversation is already being saved automatically via onConversationUpdate
+    }
     setIsOpen(false);
     setIsMinimized(false);
   };
+
+
 
   // Auto-open after delay if configured
   useEffect(() => {
@@ -89,9 +97,8 @@ export function ToggleableChatbot({
 
   // Handle conversation updates to show notification
   const handleConversationUpdate = (messages: any[]) => {
-    if (onConversationUpdate) {
-      onConversationUpdate(messages);
-    }
+    setConversationHistory(messages);
+    onConversationUpdate?.(messages);
     
     // Show notification for new bot messages when closed
     if (!isOpen && messages.length > 0) {
