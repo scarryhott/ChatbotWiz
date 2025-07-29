@@ -88,7 +88,10 @@ export function EnhancedChatbot({
   onConversationUpdate,
   className,
   style,
-  widgetSize = 'medium'
+  widgetSize = 'medium',
+  initialConversation = [],
+  sessionId: externalSessionId,
+  chatbotId
 }: EnhancedChatbotProps) {
   // Core state management
   const [messages, setMessages] = useState<ConversationMessage[]>([]);
@@ -125,7 +128,10 @@ export function EnhancedChatbot({
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const userId = useRef(generateUserId());
-  const sessionId = useRef(`session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
+  const sessionId = useRef(externalSessionId || `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
+  
+  // Storage key for conversation persistence
+  const storageKey = `chatbot-conversation-${chatbotId || config.id || 'default'}`;
 
   // Business info from config
   const businessInfo = {
@@ -204,13 +210,64 @@ export function EnhancedChatbot({
     }
   }, []);
 
-  // Update parent components when conversation changes
+  // Load conversation from localStorage on component mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(storageKey);
+      if (saved) {
+        const parsedConversation = JSON.parse(saved);
+        if (parsedConversation.length > 0) {
+          console.log('Loaded conversation from localStorage:', parsedConversation);
+          const messagesByTopic: Record<string, ConversationMessage[]> = {
+            'WHO': [], 'WHAT': [], 'WHY': [], 'WHERE': [], 'WHEN': []
+          };
+          
+          parsedConversation.forEach((msg: ConversationMessage) => {
+            if (msg.topic && messagesByTopic[msg.topic]) {
+              messagesByTopic[msg.topic].push(msg);
+            }
+          });
+          
+          setChatAreaMessages(messagesByTopic);
+          return;
+        }
+      }
+      
+      if (initialConversation && initialConversation.length > 0) {
+        console.log('Using initial conversation:', initialConversation);
+        const messagesByTopic: Record<string, ConversationMessage[]> = {
+          'WHO': [], 'WHAT': [], 'WHY': [], 'WHERE': [], 'WHEN': []
+        };
+        
+        initialConversation.forEach((msg: any) => {
+          if (msg.topic && messagesByTopic[msg.topic]) {
+            messagesByTopic[msg.topic].push(msg);
+          }
+        });
+        
+        setChatAreaMessages(messagesByTopic);
+      }
+    } catch (error) {
+      console.error('Error loading conversation:', error);
+    }
+  }, [storageKey, initialConversation]);
+
+  // Update parent components when conversation changes and save to localStorage
   useEffect(() => {
     const allMessages = Object.values(chatAreaMessages).flat();
+    
+    // Save to localStorage for persistence
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(allMessages));
+      console.log('Conversation saved to localStorage');
+    } catch (error) {
+      console.error('Error saving conversation:', error);
+    }
+    
     if (onConversationUpdate) {
       onConversationUpdate(allMessages);
     }
-  }, [chatAreaMessages, onConversationUpdate]);
+  }, [chatAreaMessages, onConversationUpdate, storageKey]);
 
   // Auto-scroll to bottom when new messages are added
   useEffect(() => {

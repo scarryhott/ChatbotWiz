@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MessageCircle, X, Minimize2, Maximize2 } from 'lucide-react';
@@ -45,6 +45,10 @@ export function ToggleableChatbot({
   const [isMinimized, setIsMinimized] = useState(false);
   const [hasNewMessage, setHasNewMessage] = useState(false);
   const [conversationHistory, setConversationHistory] = useState<any[]>([]);
+  
+  // Generate persistent session ID and storage key for this widget instance
+  const sessionId = useRef(`session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
+  const storageKey = `chatbot-conversation-${chatbotId || config.id || 'default'}`;
 
   const positionClasses = {
     'bottom-right': 'fixed bottom-4 right-4 z-50',
@@ -95,10 +99,33 @@ export function ToggleableChatbot({
     return () => clearTimeout(timer);
   }, [autoOpen]);
 
-  // Handle conversation updates to show notification
+  // Load conversation from localStorage on mount
+  useEffect(() => {
+    try {
+      const savedConversation = localStorage.getItem(storageKey);
+      if (savedConversation) {
+        const parsed = JSON.parse(savedConversation);
+        console.log('Loaded conversation from storage:', parsed);
+        setConversationHistory(parsed);
+        onConversationUpdate?.(parsed);
+      }
+    } catch (error) {
+      console.error('Error loading conversation:', error);
+    }
+  }, [storageKey]);
+
+  // Handle conversation updates to show notification and save to localStorage
   const handleConversationUpdate = (messages: any[]) => {
     setConversationHistory(messages);
     onConversationUpdate?.(messages);
+    
+    // Save to localStorage for persistence
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(messages));
+      console.log('Conversation saved to storage:', messages);
+    } catch (error) {
+      console.error('Error saving conversation:', error);
+    }
     
     // Show notification for new bot messages when closed
     if (!isOpen && messages.length > 0) {
