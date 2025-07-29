@@ -274,21 +274,17 @@ export function EnhancedChatbot({
     
     const allMessages = Object.values(chatAreaMessages).flat();
     
-    // Save to localStorage for persistence (debounced)
-    const saveTimeout = setTimeout(() => {
-      try {
-        localStorage.setItem(storageKey, JSON.stringify(allMessages));
-        console.log('Conversation saved to localStorage');
-      } catch (error) {
-        console.error('Error saving conversation:', error);
-      }
-    }, 100);
+    // Always save to localStorage for persistence within the same page session
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(allMessages));
+      console.log('Conversation saved to localStorage');
+    } catch (error) {
+      console.error('Error saving conversation:', error);
+    }
     
     if (onConversationUpdate) {
       onConversationUpdate(allMessages);
     }
-    
-    return () => clearTimeout(saveTimeout);
   }, [chatAreaMessages, onConversationUpdate, storageKey, hasLoadedFromStorage]);
 
   // Auto-scroll to bottom when new messages are added

@@ -49,11 +49,18 @@ export function ToggleableChatbot({
   // Generate persistent session ID and storage key for this widget instance
   const sessionId = useRef(`session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
   
-  // Create a storage key that changes on each page reload to clear conversation
+  // Create a storage key that persists during session but clears on page reload
   const pageSessionId = useMemo(() => {
-    // Use a timestamp-based session that's unique per page load
-    return `page_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  }, []); // Empty dependency array means this only runs once per component mount
+    // Use sessionStorage to get a session ID that persists during the page session
+    // but clears when the page is refreshed or closed
+    const existingSessionId = sessionStorage.getItem('chatbot-page-session');
+    if (existingSessionId) {
+      return existingSessionId;
+    }
+    const newSessionId = `page_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    sessionStorage.setItem('chatbot-page-session', newSessionId);
+    return newSessionId;
+  }, []);
   
   const storageKey = `chatbot-conversation-${chatbotId || config.id || 'default'}-${pageSessionId}`;
 
@@ -135,12 +142,10 @@ export function ToggleableChatbot({
     setConversationHistory(messages);
     onConversationUpdate?.(messages);
     
-    // Save to localStorage for persistence
+    // Always save to localStorage for persistence within the same page session
     try {
-      if (messages && messages.length > 0) {
-        localStorage.setItem(storageKey, JSON.stringify(messages));
-        console.log('Conversation saved to storage:', messages);
-      }
+      localStorage.setItem(storageKey, JSON.stringify(messages));
+      console.log('Conversation saved to storage:', messages);
     } catch (error) {
       console.error('Error saving conversation:', error);
     }
