@@ -18,6 +18,10 @@ This is a full-stack TypeScript application for an AI-powered chatbot creation a
 ✓ **Removed Duplicate Headers** - Cleaned up chatbot widget interface for better UX
 ✓ **Responsive Content Scaling** - All chatbot content now scales properly with widget size settings
 ✓ **Enhanced Error Handling** - Proper 401 handling and authentication error states
+✓ **Session-Based Lead Capture** - Fixed chatbot ID passing to ensure leads are saved with correct associations
+✓ **Comprehensive Lead Storage** - All conversation data, contact info, and 5W progress is captured and stored
+✓ **AI Response Enhancement** - Made responses brief, concise, and dynamic to match user communication style
+✓ **Data Validation System** - Added validation for timing (realistic dates), location (service area), and contact info (proper email/phone format)
 
 ## User Preferences
 

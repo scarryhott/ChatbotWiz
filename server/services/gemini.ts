@@ -212,12 +212,15 @@ INTELLIGENT BEHAVIOR:
 7. Be conversational and adaptive, not rigid or form-like
 
 CONVERSATION STYLE - CRITICAL:
+- Keep responses BRIEF, CONCISE, and DYNAMIC - max 2-3 sentences unless explaining complex services
 - ALWAYS provide helpful information, services details, or solutions BEFORE asking questions
 - When user asks about services, immediately share service details and benefits
 - When user mentions a need, offer specific solutions and expertise
 - Never ask "what prompted you to..." - instead explain how you can help
 - Give value first: "We offer X, Y, Z services that solve..." then "What specific area interests you?"
 - Build trust by demonstrating knowledge, not by interrogating
+- Respond naturally to user's tone and style - match their energy level
+- Avoid repetitive phrases - vary your responses dynamically
 
 Current Topic: ${currentTopic} (but be flexible to move based on user responses)`;
 
@@ -257,14 +260,18 @@ ANALYZE AND RESPOND INTELLIGENTLY:
 4. Have you gathered enough info for current topic to move forward?
 
 Generate a response that:
+- Is BRIEF and DYNAMIC (1-2 sentences max unless explaining services)
 - FIRST provides valuable information, service details, or solutions
 - Shows expertise and knowledge before asking any questions
 - If user asks about services, immediately explain what you offer and how it helps
 - If user mentions a problem, immediately offer relevant solutions
 - NEVER ask "what prompted this" or "tell me more about your motivation"
 - Switch topics naturally when user indicates different focus
-- For WHEN topic: If user mentions vague times (like "Thursday" or "morning"), gently ask for more specific details like AM/PM or preferred time ranges
+- For WHEN topic: Validate timing as realistic dates/times, ask for clarification if unrealistic
+- For WHERE topic: Ensure location is within service area, clarify if outside coverage
+- For WHO topic: Validate contact info format (proper email/phone format)
 - Only collect contact info after demonstrating clear value
+- Match user's communication style and energy
 
 WHEN TOPIC ENHANCED GUIDELINES:
 - When user mentions times, capture both time AND AM/PM preferences
@@ -382,22 +389,25 @@ function getExtractionSchema(topic: string): string {
 - preferences: Preferences or specific needs
 - budget_range: Any budget information mentioned`;
     case 'when':
-      return `- timeline: When they need service/solution
-- deadline: Any specific deadlines
-- availability: Their availability for scheduling
-- preferred_times: Specific times mentioned (with AM/PM if provided)`;
+      return `- timeline: When they need service/solution (validate as realistic date/time)
+- deadline: Any specific deadlines (validate as realistic dates)
+- availability: Their availability for scheduling (validate time format)
+- preferred_times: Specific times mentioned (validate AM/PM format and realistic times)
+- valid_date: true/false if timing is realistic and achievable`;
     case 'where':
-      return `- location: Service location or address
+      return `- location: Service location or address (validate if in service area)
 - service_area: Geographic area needing service
 - property_type: Type of property/building
-- accessibility: Any location-specific requirements`;
+- accessibility: Any location-specific requirements
+- in_service_area: true/false if location is within company's service coverage`;
     case 'who':
-      return `- name: Contact person's name
+      return `- name: Contact person's name (validate as real name, not placeholder)
 - title: Job title or role
 - company: Company/organization name
-- email: Email address
-- phone: Phone number
-- decision_maker: Whether they make decisions`;
+- email: Email address (validate email format)
+- phone: Phone number (validate phone format)
+- decision_maker: Whether they make decisions
+- valid_contact: true/false if contact info appears legitimate`;
     default:
       return `- ${topic}: Relevant information for this topic`;
   }
@@ -440,6 +450,7 @@ function getExtractionProperties(topic: string): Record<string, any> {
         preferred_times: { type: "string" },
         specific_dates: { type: "string" },
         time_preferences: { type: "string" },
+        valid_date: { type: "boolean" },
         when: { type: "string" }
       };
     case 'where':
@@ -450,6 +461,7 @@ function getExtractionProperties(topic: string): Record<string, any> {
         property_type: { type: "string" },
         accessibility: { type: "string" },
         address: { type: "string" },
+        in_service_area: { type: "boolean" },
         where: { type: "string" }
       };
     case 'who':
@@ -457,6 +469,7 @@ function getExtractionProperties(topic: string): Record<string, any> {
         ...baseProperties,
         title: { type: "string" },
         decision_maker: { type: "string" },
+        valid_contact: { type: "boolean" },
         who: { type: "string" }
       };
     default:

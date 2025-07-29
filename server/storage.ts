@@ -410,14 +410,17 @@ export class DatabaseStorage implements IStorage {
       if (data.topic === 'where') updatedFiveWProgress.where = { completed: true, value: data.extractedInfo.where || '' };
       if (data.topic === 'who') updatedFiveWProgress.who = { completed: true, value: data.extractedInfo.who || '' };
 
+      // Validate extracted information
+      const validatedInfo = validateExtractedInfo(data.extractedInfo, data.topic);
       console.log('Updating existing lead with extracted info:', {
         leadId: lead.id,
         extractedInfo: data.extractedInfo,
+        validatedInfo,
         newContactInfo: {
-          name: data.extractedInfo.name,
-          email: data.extractedInfo.email,
-          phone: data.extractedInfo.phone,
-          company: data.extractedInfo.company
+          name: validatedInfo.name,
+          email: validatedInfo.email,
+          phone: validatedInfo.phone,
+          company: validatedInfo.company
         }
       });
 
@@ -435,10 +438,10 @@ export class DatabaseStorage implements IStorage {
             topic: data.topic
           })),
           currentTopic: data.topic,
-          name: data.extractedInfo.name || lead.name,
-          email: data.extractedInfo.email || lead.email,
-          phone: data.extractedInfo.phone || lead.phone,
-          company: data.extractedInfo.company || lead.company,
+          name: validatedInfo.name || lead.name,
+          email: validatedInfo.email || lead.email,
+          phone: validatedInfo.phone || lead.phone,
+          company: validatedInfo.company || lead.company,
           updatedAt: new Date()
         })
         .where(eq(leads.id, lead.id))
@@ -472,15 +475,18 @@ export class DatabaseStorage implements IStorage {
       if (data.topic === 'where') fiveWProgress.where = { completed: true, value: data.extractedInfo.where || '' };
       if (data.topic === 'who') fiveWProgress.who = { completed: true, value: data.extractedInfo.who || '' };
 
+      // Validate extracted information
+      const validatedInfo = validateExtractedInfo(data.extractedInfo, data.topic);
       console.log('Creating new lead with extracted info:', {
         chatbotId: data.chatbotId,
         sessionId: data.sessionId,
         extractedInfo: data.extractedInfo,
+        validatedInfo,
         contactInfo: {
-          name: data.extractedInfo.name,
-          email: data.extractedInfo.email,
-          phone: data.extractedInfo.phone,
-          company: data.extractedInfo.company
+          name: validatedInfo.name,
+          email: validatedInfo.email,
+          phone: validatedInfo.phone,
+          company: validatedInfo.company
         }
       });
 
@@ -489,10 +495,10 @@ export class DatabaseStorage implements IStorage {
         .values({
           chatbotId: data.chatbotId,
           sessionId: data.sessionId,
-          name: data.extractedInfo.name || null,
-          email: data.extractedInfo.email || null,
-          phone: data.extractedInfo.phone || null,
-          company: data.extractedInfo.company || null,
+          name: validatedInfo.name || null,
+          email: validatedInfo.email || null,
+          phone: validatedInfo.phone || null,
+          company: validatedInfo.company || null,
           fiveWProgress,
           extractedInfo: data.extractedInfo,
           completedTopics: [data.topic],
@@ -521,6 +527,90 @@ export class DatabaseStorage implements IStorage {
       return newLead;
     }
   }
+}
+
+// Validation functions for extracted information
+function validateExtractedInfo(extractedInfo: Record<string, any>, topic: string): Record<string, any> {
+  const validated = { ...extractedInfo };
+
+  // Validate email format
+  if (validated.email && validated.email !== 'null') {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(validated.email)) {
+      console.log(`Invalid email format detected: ${validated.email}`);
+      validated.email = null;
+    }
+  } else if (validated.email === 'null') {
+    validated.email = null;
+  }
+
+  // Validate phone format
+  if (validated.phone && validated.phone !== 'null') {
+    const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+    const cleanPhone = validated.phone.replace(/[\s\-\(\)]/g, '');
+    if (!phoneRegex.test(cleanPhone) || cleanPhone.length < 10) {
+      console.log(`Invalid phone format detected: ${validated.phone}`);
+      validated.phone = null;
+    }
+  } else if (validated.phone === 'null') {
+    validated.phone = null;
+  }
+
+  // Validate name (ensure it's not placeholder text)
+  if (validated.name && validated.name !== 'null') {
+    const placeholderNames = ['test', 'user', 'customer', 'client', 'name', 'john doe', 'jane doe'];
+    if (placeholderNames.includes(validated.name.toLowerCase()) || validated.name.length < 2) {
+      console.log(`Invalid or placeholder name detected: ${validated.name}`);
+      validated.name = null;
+    }
+  } else if (validated.name === 'null') {
+    validated.name = null;
+  }
+
+  // Validate company name
+  if (validated.company === 'null' || (validated.company && validated.company.toLowerCase().includes('assistant'))) {
+    validated.company = null;
+  }
+
+  // Topic-specific validations
+  if (topic === 'when') {
+    // Validate dates and times
+    if (validated.timeline && validated.timeline !== 'null') {
+      const futureDateKeywords = ['next week', 'tomorrow', 'this week', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
+      const hasValidTiming = futureDateKeywords.some(keyword => 
+        validated.timeline.toLowerCase().includes(keyword)
+      );
+      
+      if (!hasValidTiming && !validated.timeline.match(/\d{1,2}\/\d{1,2}\/\d{4}|\d{4}-\d{2}-\d{2}/)) {
+        console.log(`Invalid timing detected: ${validated.timeline}`);
+        validated.valid_date = false;
+      } else {
+        validated.valid_date = true;
+      }
+    }
+  }
+
+  if (topic === 'where') {
+    // Validate location is not empty or placeholder
+    if (validated.location && validated.location !== 'null') {
+      const placeholderLocations = ['test location', 'sample', 'example'];
+      if (placeholderLocations.some(placeholder => 
+        validated.location.toLowerCase().includes(placeholder)
+      ) || validated.location.length < 3) {
+        console.log(`Invalid location detected: ${validated.location}`);
+        validated.in_service_area = false;
+      } else {
+        validated.in_service_area = true;
+      }
+    }
+  }
+
+  if (topic === 'who') {
+    // Check if contact info is valid overall
+    validated.valid_contact = !!(validated.name && validated.email) || !!(validated.name && validated.phone);
+  }
+
+  return validated;
 }
 
 export const storage = new DatabaseStorage();
