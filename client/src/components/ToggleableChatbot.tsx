@@ -132,11 +132,16 @@ export function ToggleableChatbot({
       
       // Load current conversation if it exists
       const savedConversation = localStorage.getItem(storageKey);
+      console.log('Checking for saved conversation with key:', storageKey);
       if (savedConversation) {
         const parsed = JSON.parse(savedConversation);
         if (parsed && Array.isArray(parsed) && parsed.length > 0) {
           console.log('Loaded conversation from storage:', parsed);
           setConversationHistory(parsed);
+          // Trigger the onConversationUpdate to pass to child components
+          if (onConversationUpdate) {
+            onConversationUpdate(parsed);
+          }
           // Set red dot if there are messages and chat is closed
           if (!isOpen) {
             setHasNewMessage(true);
@@ -158,13 +163,12 @@ export function ToggleableChatbot({
     setConversationHistory(messages);
     onConversationUpdate?.(messages);
     
-    // Always save to localStorage for persistence within the same page session
+    // Save to localStorage immediately when we have messages
     try {
       if (messages && messages.length > 0) {
         localStorage.setItem(storageKey, JSON.stringify(messages));
         console.log('Conversation saved to storage:', messages);
       } else {
-        // Don't save empty conversations
         console.log('Skipping save - empty conversation');
       }
     } catch (error) {

@@ -285,7 +285,12 @@ export function EnhancedChatbot({
     const allMessages = Object.values(chatAreaMessages).flat();
     console.log('EnhancedChatbot saving messages:', allMessages);
     
-    // Always save to localStorage for persistence within the same page session
+    // Only call onConversationUpdate and save if we have messages
+    if (onConversationUpdate) {
+      onConversationUpdate(allMessages);
+    }
+    
+    // Save to localStorage only if we have actual messages
     try {
       if (allMessages.length > 0) {
         localStorage.setItem(storageKey, JSON.stringify(allMessages));
@@ -293,10 +298,6 @@ export function EnhancedChatbot({
       }
     } catch (error) {
       console.error('Error saving conversation:', error);
-    }
-    
-    if (onConversationUpdate) {
-      onConversationUpdate(allMessages);
     }
   }, [chatAreaMessages, onConversationUpdate, storageKey, hasLoadedFromStorage]);
 
