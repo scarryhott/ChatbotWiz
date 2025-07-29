@@ -5,8 +5,9 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Filter, Download, User, Phone, Mail, MapPin, Calendar, MessageCircle, Check, X } from 'lucide-react';
+import { Search, Filter, Download, User, Phone, Mail, MapPin, Calendar, MessageCircle, Check, X, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 
 interface Lead {
   id: string;
@@ -110,6 +111,39 @@ export default function EnhancedLeadCollection({ chatbotId }: EnhancedLeadCollec
       }
     } catch (error) {
       console.error('Error updating lead status:', error);
+    }
+  };
+
+  const { toast } = useToast();
+
+  const deleteLead = async (leadId: string) => {
+    try {
+      const response = await fetch(`/api/leads/${leadId}`, {
+        method: 'DELETE',
+      });
+      
+      if (response.ok) {
+        setLeads(prev => prev.filter(lead => lead.id !== leadId));
+        toast({
+          title: "Lead deleted",
+          description: "The lead has been successfully deleted.",
+        });
+      } else {
+        throw new Error('Failed to delete lead');
+      }
+    } catch (error) {
+      console.error('Error deleting lead:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete the lead. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteLead = (leadId: string, leadName: string) => {
+    if (window.confirm(`Are you sure you want to delete the lead for "${leadName || 'Anonymous'}"? This action cannot be undone.`)) {
+      deleteLead(leadId);
     }
   };
 
@@ -337,6 +371,15 @@ export default function EnhancedLeadCollection({ chatbotId }: EnhancedLeadCollec
                   disabled={lead.status === 'qualified' || lead.status === 'converted'}
                 >
                   Qualify
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleDeleteLead(lead.id, lead.name)}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                >
+                  <Trash2 className="w-4 h-4 mr-1" />
+                  Delete
                 </Button>
               </div>
 

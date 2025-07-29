@@ -321,6 +321,10 @@ export class DatabaseStorage implements IStorage {
     return lead;
   }
 
+  async deleteLead(id: string): Promise<void> {
+    await db.delete(leads).where(eq(leads.id, id));
+  }
+
   async searchLeads(chatbotId: string, query: string): Promise<Lead[]> {
     return await db
       .select()

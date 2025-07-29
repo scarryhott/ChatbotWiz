@@ -161,6 +161,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete("/api/leads/:id", isAuthenticated, async (req, res) => {
+    try {
+      await storage.deleteLead(req.params.id);
+      res.json({ message: "Lead deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete lead", error: (error as Error).message });
+    }
+  });
+
   // Website analysis route
   app.post("/api/analyze-website", async (req, res) => {
     try {

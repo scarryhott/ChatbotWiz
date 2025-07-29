@@ -1,12 +1,14 @@
 import { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Search, Download, Eye, Check, Clock } from "lucide-react";
+import { Search, Download, Eye, Check, Clock, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import type { Lead } from "@shared/schema";
 
 interface LeadManagementProps {
@@ -16,11 +18,41 @@ interface LeadManagementProps {
 export default function LeadManagement({ chatbotId }: LeadManagementProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("date");
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: leads = [], isLoading } = useQuery<Lead[]>({
     queryKey: ["/api/chatbots", chatbotId, "leads"],
     enabled: !!chatbotId,
   });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (leadId: string) => {
+      await apiRequest(`/api/leads/${leadId}`, {
+        method: "DELETE",
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/chatbots", chatbotId, "leads"] });
+      toast({
+        title: "Lead deleted",
+        description: "The lead has been successfully deleted.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to delete the lead. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleDeleteLead = (leadId: string, leadName: string) => {
+    if (window.confirm(`Are you sure you want to delete the lead for "${leadName || 'Anonymous'}"? This action cannot be undone.`)) {
+      deleteMutation.mutate(leadId);
+    }
+  };
 
   const filteredAndSortedLeads = useMemo(() => {
     let filtered = leads;
@@ -227,6 +259,15 @@ export default function LeadManagement({ chatbotId }: LeadManagementProps) {
                         </Button>
                         <Button variant="ghost" size="sm">
                           <Download className="w-4 h-4 text-gray-400" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleDeleteLead(lead.id, lead.name)}
+                          disabled={deleteMutation.isPending}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
                     </td>
