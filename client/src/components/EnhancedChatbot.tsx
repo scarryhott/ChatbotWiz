@@ -399,10 +399,19 @@ export function EnhancedChatbot({
     };
 
     // Add user message to current tab
-    setChatAreaMessages(prev => ({
-      ...prev,
-      [activeTab]: [...(prev[activeTab] || []), userMessage]
-    }));
+    const updatedWithUser = {
+      ...chatAreaMessages,
+      [activeTab]: [...(chatAreaMessages[activeTab] || []), userMessage]
+    };
+    
+    setChatAreaMessages(updatedWithUser);
+
+    // Immediately save after user message
+    const userMessages = Object.values(updatedWithUser).flat();
+    console.log('Saving user message:', userMessages);
+    if (onConversationUpdate && userMessages.length > 0) {
+      onConversationUpdate(userMessages);
+    }
 
     setCurrentMessage('');
     setIsTyping(true);
@@ -428,10 +437,19 @@ export function EnhancedChatbot({
         topic: responseTab
       };
 
-      setChatAreaMessages(prev => ({
-        ...prev,
-        [responseTab]: [...(prev[responseTab] || []), botMessage]
-      }));
+      const finalMessages = {
+        ...updatedWithUser,
+        [responseTab]: [...(updatedWithUser[responseTab] || []), botMessage]
+      };
+
+      setChatAreaMessages(finalMessages);
+
+      // Save complete conversation after bot response
+      const allMessages = Object.values(finalMessages).flat();
+      console.log('Saving complete conversation:', allMessages);
+      if (onConversationUpdate && allMessages.length > 0) {
+        onConversationUpdate(allMessages);
+      }
 
       // Update lead data
       const updatedLeadData = {
