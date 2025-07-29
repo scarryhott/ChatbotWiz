@@ -60,6 +60,10 @@ export function ToggleableChatbot({
     if (isOpen) {
       setIsOpen(false);
       setIsMinimized(false);
+      // Show red dot if there are messages when closing
+      if (conversationHistory && conversationHistory.length > 0) {
+        setHasNewMessage(true);
+      }
     } else {
       setIsOpen(true);
       setIsMinimized(false);
@@ -105,14 +109,19 @@ export function ToggleableChatbot({
       const savedConversation = localStorage.getItem(storageKey);
       if (savedConversation) {
         const parsed = JSON.parse(savedConversation);
-        console.log('Loaded conversation from storage:', parsed);
-        setConversationHistory(parsed);
-        onConversationUpdate?.(parsed);
+        if (parsed && parsed.length > 0) {
+          console.log('Loaded conversation from storage:', parsed);
+          setConversationHistory(parsed);
+          // Set red dot if there are messages and chat is closed
+          if (!isOpen) {
+            setHasNewMessage(true);
+          }
+        }
       }
     } catch (error) {
       console.error('Error loading conversation:', error);
     }
-  }, [storageKey]);
+  }, [storageKey, isOpen]);
 
   // Handle conversation updates to show notification and save to localStorage
   const handleConversationUpdate = (messages: any[]) => {
@@ -121,8 +130,10 @@ export function ToggleableChatbot({
     
     // Save to localStorage for persistence
     try {
-      localStorage.setItem(storageKey, JSON.stringify(messages));
-      console.log('Conversation saved to storage:', messages);
+      if (messages && messages.length > 0) {
+        localStorage.setItem(storageKey, JSON.stringify(messages));
+        console.log('Conversation saved to storage:', messages);
+      }
     } catch (error) {
       console.error('Error saving conversation:', error);
     }

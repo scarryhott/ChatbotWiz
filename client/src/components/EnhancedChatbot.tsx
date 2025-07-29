@@ -220,7 +220,7 @@ export function EnhancedChatbot({
       const saved = localStorage.getItem(storageKey);
       if (saved) {
         const parsedConversation = JSON.parse(saved);
-        if (parsedConversation.length > 0) {
+        if (parsedConversation && parsedConversation.length > 0) {
           console.log('Loaded conversation from localStorage:', parsedConversation);
           const messagesByTopic: Record<string, ConversationMessage[]> = {
             'WHO': [], 'WHAT': [], 'WHY': [], 'WHERE': [], 'WHEN': []
@@ -233,6 +233,13 @@ export function EnhancedChatbot({
           });
           
           setChatAreaMessages(messagesByTopic);
+          
+          // Set active tab to the last message's topic
+          const lastMessage = parsedConversation[parsedConversation.length - 1];
+          if (lastMessage && lastMessage.topic) {
+            setActiveTab(lastMessage.topic);
+          }
+          
           setHasLoadedFromStorage(true);
           return;
         }
