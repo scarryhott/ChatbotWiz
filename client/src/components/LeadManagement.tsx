@@ -5,7 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Search, Download, Eye, Check, Clock, Trash2 } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Search, Download, Eye, Check, Clock, Trash2, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -265,6 +267,57 @@ export default function LeadManagement({ chatbotId }: LeadManagementProps) {
                         <Button variant="ghost" size="sm">
                           <Eye className="w-4 h-4 text-primary-600" />
                         </Button>
+                        {(lead as any).topicMessages && Object.keys((lead as any).topicMessages).length > 0 && (
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button variant="ghost" size="sm" title="View Conversations">
+                                <MessageSquare className="w-4 h-4 text-blue-600" />
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-4xl max-h-[80vh]">
+                              <DialogHeader>
+                                <DialogTitle>Conversation History - {lead.name || 'Anonymous'}</DialogTitle>
+                                <DialogDescription>
+                                  Complete conversation history organized by topics
+                                </DialogDescription>
+                              </DialogHeader>
+                              <ScrollArea className="h-[60vh] w-full">
+                                <div className="space-y-6 p-4">
+                                  {Object.entries((lead as any).topicMessages as Record<string, any[]>).map(([topic, messages]) => (
+                                    <div key={topic} className="border rounded-lg p-4">
+                                      <div className="text-lg font-semibold text-gray-800 uppercase mb-4 border-b pb-2">
+                                        {topic} Topic - {messages.length} messages
+                                      </div>
+                                      <div className="space-y-3">
+                                        {messages.map((msg: any, idx: number) => (
+                                          <div key={idx} className={`p-3 rounded-lg ${
+                                            msg.type === 'user' 
+                                              ? 'bg-blue-50 border-l-4 border-blue-400 ml-8' 
+                                              : 'bg-gray-50 border-l-4 border-gray-400 mr-8'
+                                          }`}>
+                                            <div className="flex items-center justify-between mb-1">
+                                              <span className={`text-sm font-medium ${
+                                                msg.type === 'user' ? 'text-blue-700' : 'text-gray-700'
+                                              }`}>
+                                                {msg.type === 'user' ? '👤 User' : '🤖 Assistant'}
+                                              </span>
+                                              <span className="text-xs text-gray-500">
+                                                {new Date(msg.timestamp).toLocaleTimeString()}
+                                              </span>
+                                            </div>
+                                            <div className="text-sm text-gray-800 whitespace-pre-wrap">
+                                              {msg.content}
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </ScrollArea>
+                            </DialogContent>
+                          </Dialog>
+                        )}
                         <Button variant="ghost" size="sm">
                           <Download className="w-4 h-4 text-gray-400" />
                         </Button>

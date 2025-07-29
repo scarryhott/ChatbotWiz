@@ -5,7 +5,9 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Filter, Download, User, Phone, Mail, MapPin, Calendar, MessageCircle, Check, X, Trash2 } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Search, Filter, Download, User, Phone, Mail, MapPin, Calendar, MessageCircle, Check, X, Trash2, Eye } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 
@@ -329,22 +331,74 @@ export default function EnhancedLeadCollection({ chatbotId }: EnhancedLeadCollec
                 </div>
               )}
 
-              {/* Topic Messages */}
+              {/* Topic Messages with Full Conversation View */}
               {(lead as any).topicMessages && Object.keys((lead as any).topicMessages).length > 0 && (
                 <div>
-                  <div className="text-sm font-medium mb-2">Topic Conversations:</div>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="text-sm font-medium">Topic Conversations:</div>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" size="sm" className="text-xs">
+                          <Eye className="w-3 h-3 mr-1" />
+                          View All
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-4xl max-h-[80vh]">
+                        <DialogHeader>
+                          <DialogTitle>Complete Conversation History - {lead.name || 'Anonymous'}</DialogTitle>
+                          <DialogDescription>
+                            Full conversation history organized by topics
+                          </DialogDescription>
+                        </DialogHeader>
+                        <ScrollArea className="h-[60vh] w-full">
+                          <div className="space-y-6 p-4">
+                            {Object.entries((lead as any).topicMessages as Record<string, any[]>).map(([topic, messages]) => (
+                              <div key={topic} className="border rounded-lg p-4">
+                                <div className="text-lg font-semibold text-gray-800 uppercase mb-4 border-b pb-2">
+                                  {topic} Topic - {messages.length} messages
+                                </div>
+                                <div className="space-y-3">
+                                  {messages.map((msg: any, idx: number) => (
+                                    <div key={idx} className={`p-3 rounded-lg ${
+                                      msg.type === 'user' 
+                                        ? 'bg-blue-50 border-l-4 border-blue-400 ml-8' 
+                                        : 'bg-gray-50 border-l-4 border-gray-400 mr-8'
+                                    }`}>
+                                      <div className="flex items-center justify-between mb-1">
+                                        <span className={`text-sm font-medium ${
+                                          msg.type === 'user' ? 'text-blue-700' : 'text-gray-700'
+                                        }`}>
+                                          {msg.type === 'user' ? '👤 User' : '🤖 Assistant'}
+                                        </span>
+                                        <span className="text-xs text-gray-500">
+                                          {new Date(msg.timestamp).toLocaleTimeString()}
+                                        </span>
+                                      </div>
+                                      <div className="text-sm text-gray-800 whitespace-pre-wrap">
+                                        {msg.content}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </ScrollArea>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
                   <div className="space-y-2">
                     {Object.entries((lead as any).topicMessages as Record<string, any[]>).map(([topic, messages]) => (
                       <div key={topic} className="bg-gray-50 p-2 rounded">
                         <div className="text-xs font-semibold text-gray-700 uppercase mb-1">{topic}</div>
-                        <div className="space-y-1 max-h-32 overflow-y-auto">
-                          {messages.slice(-3).map((msg: any, idx: number) => (
+                        <div className="space-y-1">
+                          {messages.slice(-2).map((msg: any, idx: number) => (
                             <div key={idx} className={`text-xs ${msg.type === 'user' ? 'text-blue-600' : 'text-gray-600'}`}>
-                              <span className="font-medium">{msg.type === 'user' ? 'User' : 'Bot'}:</span> {msg.content.substring(0, 80)}...
+                              <span className="font-medium">{msg.type === 'user' ? 'User' : 'Bot'}:</span> {msg.content.substring(0, 60)}...
                             </div>
                           ))}
-                          {messages.length > 3 && (
-                            <div className="text-xs text-gray-400">...and {messages.length - 3} more messages</div>
+                          {messages.length > 2 && (
+                            <div className="text-xs text-gray-400">...and {messages.length - 2} more messages</div>
                           )}
                         </div>
                       </div>
