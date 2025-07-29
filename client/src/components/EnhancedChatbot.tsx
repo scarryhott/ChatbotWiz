@@ -217,6 +217,16 @@ export function EnhancedChatbot({
     if (hasLoadedFromStorage) return;
     
     try {
+      // Clean up old conversation data from previous sessions first
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('chatbot-conversation-') && !key.includes(storageKey.split('-').pop() || '')) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach(key => localStorage.removeItem(key));
+      
       const saved = localStorage.getItem(storageKey);
       if (saved) {
         const parsedConversation = JSON.parse(saved);

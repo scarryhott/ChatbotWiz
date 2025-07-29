@@ -117,9 +117,20 @@ export function ToggleableChatbot({
     return () => clearTimeout(timer);
   }, [autoOpen]);
 
-  // Load conversation from localStorage on mount
+  // Clean up old localStorage entries and load current conversation
   useEffect(() => {
     try {
+      // Clean up old localStorage entries from previous sessions
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('chatbot-conversation-') && !key.includes(pageSessionId)) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach(key => localStorage.removeItem(key));
+      
+      // Load current conversation if it exists
       const savedConversation = localStorage.getItem(storageKey);
       if (savedConversation) {
         const parsed = JSON.parse(savedConversation);
@@ -135,7 +146,7 @@ export function ToggleableChatbot({
     } catch (error) {
       console.error('Error loading conversation:', error);
     }
-  }, [storageKey, isOpen]);
+  }, [storageKey, pageSessionId, isOpen]);
 
   // Handle conversation updates to show notification and save to localStorage
   const handleConversationUpdate = (messages: any[]) => {
