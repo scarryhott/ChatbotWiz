@@ -84,12 +84,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (response.isTopicComplete && sessionId && chatbotId) {
         console.log('Topic completed! Saving lead for session:', sessionId, 'topic:', topic, 'chatbotId:', chatbotId, 'extractedInfo:', response.extractedInfo);
         try {
+          // Convert frontend message format to backend format
+          const convertedHistory = (conversationHistory || []).map((msg: any) => ({
+            role: msg.type === 'user' ? 'user' as const : 'assistant' as const,
+            content: msg.content,
+            timestamp: msg.timestamp
+          }));
+
           const savedLead = await storage.saveLeadFromSession({
             chatbotId,
             sessionId,
             topic,
             extractedInfo: response.extractedInfo || {},
-            conversationHistory: conversationHistory || []
+            conversationHistory: convertedHistory
           });
           console.log('Lead saved successfully:', savedLead.id);
         } catch (leadError) {

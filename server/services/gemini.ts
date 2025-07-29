@@ -228,9 +228,10 @@ CONVERSATION STYLE - CRITICAL:
 
 Current Topic: ${currentTopic} (but be flexible to move based on user responses)`;
 
-    const conversationContext = conversationHistory.slice(-6).map((msg: any) => 
-      `${msg.type}: ${msg.content}`
-    ).join('\n');
+    const conversationContext = conversationHistory.slice(-6).map((msg: any) => {
+      const role = msg.type === 'user' ? 'user' : (msg.type === 'bot' ? 'assistant' : (msg.role || msg.type));
+      return `${role}: ${msg.content}`;
+    }).join('\n');
 
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
@@ -334,7 +335,10 @@ async function extractTopicInformation(
   conversationHistory: any[]
 ): Promise<Record<string, any>> {
   try {
-    const fullConversation = conversationHistory.map((msg: any) => `${msg.role || msg.type}: ${msg.content}`).join('\n');
+    const fullConversation = conversationHistory.map((msg: any) => {
+      const role = msg.type === 'user' ? 'user' : (msg.type === 'bot' ? 'assistant' : (msg.role || msg.type));
+      return `${role}: ${msg.content}`;
+    }).join('\n');
     
     const extractionPrompt = `Extract ALL relevant information from the ENTIRE conversation for the ${topic.toUpperCase()} topic.
 
