@@ -1,4 +1,4 @@
-import { users, chatbots, leads, topicCompletions, type User, type UpsertUser, type InsertUser, type Chatbot, type InsertChatbot, type Lead, type InsertLead, type TopicCompletion, type InsertTopicCompletion } from "@shared/schema";
+import { users, chatbots, leads, topicCompletions, type User, type UpsertUser, type InsertUser, type Chatbot, type InsertChatbot, type Lead, type InsertLead, type TopicCompletion, type InsertTopicCompletion, type ConversationMessage } from "@shared/schema";
 import { db } from "./db";
 import { eq, like, and } from "drizzle-orm";
 
@@ -406,6 +406,25 @@ export class DatabaseStorage implements IStorage {
       const updatedExtractedInfo = { ...lead.extractedInfo, ...data.extractedInfo };
       const updatedCompletedTopics = Array.from(new Set([...(lead.completedTopics || []), data.topic]));
       
+      // Update topic messages - organize messages by topic
+      const updatedTopicMessages = { ...lead.topicMessages || {} };
+      const topicMessagesForTopic: ConversationMessage[] = data.conversationHistory.map(msg => ({
+        id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        type: msg.role === 'user' ? 'user' as const : 'bot' as const,
+        content: msg.content,
+        timestamp: msg.timestamp || new Date().toISOString(),
+        topic: data.topic
+      }));
+      
+      // Append new messages to existing topic messages
+      if (!updatedTopicMessages[data.topic]) {
+        updatedTopicMessages[data.topic] = [];
+      }
+      updatedTopicMessages[data.topic] = [
+        ...(updatedTopicMessages[data.topic] || []),
+        ...topicMessagesForTopic
+      ];
+      
       // Update 5W progress based on completed topics
       const updatedFiveWProgress = { ...lead.fiveWProgress };
       if (data.topic === 'why') updatedFiveWProgress.why = { completed: true, value: data.extractedInfo.why || '' };
@@ -434,13 +453,17 @@ export class DatabaseStorage implements IStorage {
           extractedInfo: updatedExtractedInfo,
           completedTopics: updatedCompletedTopics,
           fiveWProgress: updatedFiveWProgress,
-          conversationHistory: data.conversationHistory.map(msg => ({
-            id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-            type: msg.role === 'user' ? 'user' as const : 'bot' as const,
-            content: msg.content,
-            timestamp: msg.timestamp || new Date().toISOString(),
-            topic: data.topic
-          })),
+          topicMessages: updatedTopicMessages,
+          conversationHistory: [
+            ...(lead.conversationHistory || []),
+            ...data.conversationHistory.map(msg => ({
+              id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+              type: msg.role === 'user' ? 'user' as const : 'bot' as const,
+              content: msg.content,
+              timestamp: msg.timestamp || new Date().toISOString(),
+              topic: data.topic as "why" | "what" | "when" | "where" | "who" | undefined
+            }))
+          ],
           currentTopic: data.topic,
           name: validatedInfo.name || lead.name,
           email: validatedInfo.email || lead.email,
@@ -471,6 +494,16 @@ export class DatabaseStorage implements IStorage {
         where: { completed: false, value: '' },
         who: { completed: false, value: '' }
       };
+
+      // Create topic messages for new lead
+      const topicMessages: Record<string, ConversationMessage[]> = {};
+      topicMessages[data.topic] = data.conversationHistory.map(msg => ({
+        id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        type: msg.role === 'user' ? 'user' as const : 'bot' as const,
+        content: msg.content,
+        timestamp: msg.timestamp || new Date().toISOString(),
+        topic: data.topic as "why" | "what" | "when" | "where" | "who" | undefined
+      }));
 
       // Mark the current topic as completed
       if (data.topic === 'why') fiveWProgress.why = { completed: true, value: data.extractedInfo.why || '' };
@@ -506,6 +539,7 @@ export class DatabaseStorage implements IStorage {
           fiveWProgress,
           extractedInfo: data.extractedInfo,
           completedTopics: [data.topic],
+          topicMessages,
           conversationHistory: data.conversationHistory.map(msg => ({
             id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
             type: msg.role === 'user' ? 'user' as const : 'bot' as const,

@@ -9,23 +9,7 @@ import { Search, Filter, Download, User, Phone, Mail, MapPin, Calendar, MessageC
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 
-interface Lead {
-  id: string;
-  chatbotId: string;
-  name: string;
-  email: string;
-  phone: string;
-  location: string;
-  service: string;
-  message: string;
-  specificRequests: string;
-  conversationFlow: any[];
-  topicResponses: Record<string, string[]>;
-  timestamp: string;
-  status: 'new' | 'contacted' | 'qualified' | 'converted';
-  score: number;
-  completedTopics: string[];
-}
+import type { Lead } from "@shared/schema";
 
 interface EnhancedLeadCollectionProps {
   chatbotId: string;
@@ -94,7 +78,7 @@ export default function EnhancedLeadCollection({ chatbotId }: EnhancedLeadCollec
       return sortOrder === 'desc' ? -comparison : comparison;
     });
 
-  const updateLeadStatus = async (leadId: string, status: Lead['status']) => {
+  const updateLeadStatus = async (leadId: string, status: string) => {
     try {
       const response = await fetch(`/api/leads/${leadId}`, {
         method: 'PATCH',
@@ -175,11 +159,11 @@ export default function EnhancedLeadCollection({ chatbotId }: EnhancedLeadCollec
 
   const getTopicProgress = (lead: Lead) => {
     const totalTopics = 5; // WHY, WHO, WHAT, WHERE, WHEN
-    const completedCount = lead.completedTopics.length;
+    const completedCount = lead.completedTopics?.length || 0;
     return Math.round((completedCount / totalTopics) * 100);
   };
 
-  const getStatusColor = (status: Lead['status']) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
       case 'new': return 'bg-blue-100 text-blue-800';
       case 'contacted': return 'bg-yellow-100 text-yellow-800';
@@ -276,8 +260,8 @@ export default function EnhancedLeadCollection({ chatbotId }: EnhancedLeadCollec
                 <div>
                   <CardTitle className="text-lg">{lead.name || 'Anonymous'}</CardTitle>
                   <div className="flex items-center gap-2 mt-1">
-                    <Badge className={getStatusColor(lead.status)}>
-                      {lead.status}
+                    <Badge className={getStatusColor('new')}>
+                      new
                     </Badge>
                     <Badge variant="outline">
                       {getTopicProgress(lead)}% Complete
@@ -285,7 +269,7 @@ export default function EnhancedLeadCollection({ chatbotId }: EnhancedLeadCollec
                   </div>
                 </div>
                 <div className="text-right text-sm text-gray-500">
-                  Score: {lead.score}/100
+                  Topics: {lead.completedTopics?.length || 0}/5
                 </div>
               </div>
             </CardHeader>
@@ -342,6 +326,30 @@ export default function EnhancedLeadCollection({ chatbotId }: EnhancedLeadCollec
                 <div>
                   <div className="text-sm font-medium">Service Interest:</div>
                   <div className="text-sm text-gray-600">{lead.service}</div>
+                </div>
+              )}
+
+              {/* Topic Messages */}
+              {(lead as any).topicMessages && Object.keys((lead as any).topicMessages).length > 0 && (
+                <div>
+                  <div className="text-sm font-medium mb-2">Topic Conversations:</div>
+                  <div className="space-y-2">
+                    {Object.entries((lead as any).topicMessages as Record<string, any[]>).map(([topic, messages]) => (
+                      <div key={topic} className="bg-gray-50 p-2 rounded">
+                        <div className="text-xs font-semibold text-gray-700 uppercase mb-1">{topic}</div>
+                        <div className="space-y-1 max-h-32 overflow-y-auto">
+                          {messages.slice(-3).map((msg: any, idx: number) => (
+                            <div key={idx} className={`text-xs ${msg.type === 'user' ? 'text-blue-600' : 'text-gray-600'}`}>
+                              <span className="font-medium">{msg.type === 'user' ? 'User' : 'Bot'}:</span> {msg.content.substring(0, 80)}...
+                            </div>
+                          ))}
+                          {messages.length > 3 && (
+                            <div className="text-xs text-gray-400">...and {messages.length - 3} more messages</div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
 

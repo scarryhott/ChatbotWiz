@@ -118,7 +118,8 @@ export default function LeadManagement({ chatbotId }: LeadManagementProps) {
     });
   };
 
-  const formatDate = (date: Date) => {
+  const formatDate = (date: Date | null) => {
+    if (!date) return "Unknown";
     const now = new Date();
     const diffMs = now.getTime() - new Date(date).getTime();
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
@@ -245,9 +246,16 @@ export default function LeadManagement({ chatbotId }: LeadManagementProps) {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <p className="text-sm text-gray-900 max-w-xs truncate">
-                        {lead.contextSummary || "No summary available"}
-                      </p>
+                      <div className="text-sm text-gray-900 max-w-xs">
+                        <p className="truncate mb-1">
+                          {lead.contextSummary || "No summary available"}
+                        </p>
+                        {(lead as any).topicMessages && Object.keys((lead as any).topicMessages).length > 0 && (
+                          <div className="text-xs text-gray-500">
+                            Topics with messages: {Object.keys((lead as any).topicMessages).join(", ")}
+                          </div>
+                        )}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {formatDate(lead.createdAt)}

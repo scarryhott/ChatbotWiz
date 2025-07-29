@@ -47,6 +47,7 @@ export const leads = pgTable("leads", {
   specificRequests: text("specific_requests"), // Added for capturing user's specific needs
   contextSummary: text("context_summary"),
   conversationHistory: jsonb("conversation_history").$type<ConversationMessage[]>().default([]),
+  topicMessages: jsonb("topic_messages").$type<Record<string, ConversationMessage[]>>().default({}),
   currentTopic: text("current_topic").default("why"), // Track which topic user is on
   extractedInfo: jsonb("extracted_info").$type<Record<string, any>>().default({}), // Info extracted when green checkmark appears
   completedTopics: jsonb("completed_topics").$type<Array<string>>().default([]), // Topics that got green checkmarks
@@ -132,7 +133,7 @@ export interface ConversationMessage {
   type: "bot" | "user";
   content: string;
   timestamp: string;
-  topic?: "why" | "what" | "when" | "where" | "who";
+  topic?: "why" | "what" | "when" | "where" | "who" | string;
 }
 
 // Insert schemas
