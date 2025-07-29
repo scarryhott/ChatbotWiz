@@ -179,22 +179,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Toggleable Chatbot Widget */}
-        {selectedChatbot && (
-          <ToggleableChatbot 
-            config={adaptChatbotConfig(selectedChatbot)}
-            chatbotId={selectedChatbot.id}
-            onLeadUpdate={(leadData) => {
-              console.log("New lead captured:", leadData);
-              setActiveTab("leads");
-            }}
-            onConversationUpdate={(messages) => {
-              console.log("Conversation updated:", messages);
-            }}
-            position="bottom-right"
-            autoOpen={false}
-          />
-        )}
+
       </div>
     </div>
   );
