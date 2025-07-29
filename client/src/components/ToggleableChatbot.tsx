@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MessageCircle, X, Minimize2, Maximize2 } from 'lucide-react';
@@ -48,7 +48,14 @@ export function ToggleableChatbot({
   
   // Generate persistent session ID and storage key for this widget instance
   const sessionId = useRef(`session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
-  const storageKey = `chatbot-conversation-${chatbotId || config.id || 'default'}`;
+  
+  // Create a storage key that changes on each page reload to clear conversation
+  const pageSessionId = useMemo(() => {
+    // Use a timestamp-based session that's unique per page load
+    return `page_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }, []); // Empty dependency array means this only runs once per component mount
+  
+  const storageKey = `chatbot-conversation-${chatbotId || config.id || 'default'}-${pageSessionId}`;
 
   const positionClasses = {
     'bottom-right': 'fixed bottom-4 right-4 z-50',
