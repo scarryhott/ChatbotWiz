@@ -210,8 +210,12 @@ export function EnhancedChatbot({
     }
   }, []);
 
-  // Load conversation from localStorage on component mount
+  // Load conversation from localStorage only once on component mount
+  const [hasLoadedFromStorage, setHasLoadedFromStorage] = useState(false);
+  
   useEffect(() => {
+    if (hasLoadedFromStorage) return;
+    
     try {
       const saved = localStorage.getItem(storageKey);
       if (saved) {
@@ -229,6 +233,7 @@ export function EnhancedChatbot({
           });
           
           setChatAreaMessages(messagesByTopic);
+          setHasLoadedFromStorage(true);
           return;
         }
       }
@@ -247,27 +252,37 @@ export function EnhancedChatbot({
         
         setChatAreaMessages(messagesByTopic);
       }
+      
+      setHasLoadedFromStorage(true);
     } catch (error) {
       console.error('Error loading conversation:', error);
+      setHasLoadedFromStorage(true);
     }
-  }, [storageKey, initialConversation]);
+  }, [storageKey, initialConversation, hasLoadedFromStorage]);
 
   // Update parent components when conversation changes and save to localStorage
   useEffect(() => {
+    // Only save after initial load to prevent flashing
+    if (!hasLoadedFromStorage) return;
+    
     const allMessages = Object.values(chatAreaMessages).flat();
     
-    // Save to localStorage for persistence
-    try {
-      localStorage.setItem(storageKey, JSON.stringify(allMessages));
-      console.log('Conversation saved to localStorage');
-    } catch (error) {
-      console.error('Error saving conversation:', error);
-    }
+    // Save to localStorage for persistence (debounced)
+    const saveTimeout = setTimeout(() => {
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(allMessages));
+        console.log('Conversation saved to localStorage');
+      } catch (error) {
+        console.error('Error saving conversation:', error);
+      }
+    }, 100);
     
     if (onConversationUpdate) {
       onConversationUpdate(allMessages);
     }
-  }, [chatAreaMessages, onConversationUpdate, storageKey]);
+    
+    return () => clearTimeout(saveTimeout);
+  }, [chatAreaMessages, onConversationUpdate, storageKey, hasLoadedFromStorage]);
 
   // Auto-scroll to bottom when new messages are added
   useEffect(() => {
