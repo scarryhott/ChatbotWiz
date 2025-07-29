@@ -410,6 +410,17 @@ export class DatabaseStorage implements IStorage {
       if (data.topic === 'where') updatedFiveWProgress.where = { completed: true, value: data.extractedInfo.where || '' };
       if (data.topic === 'who') updatedFiveWProgress.who = { completed: true, value: data.extractedInfo.who || '' };
 
+      console.log('Updating existing lead with extracted info:', {
+        leadId: lead.id,
+        extractedInfo: data.extractedInfo,
+        newContactInfo: {
+          name: data.extractedInfo.name,
+          email: data.extractedInfo.email,
+          phone: data.extractedInfo.phone,
+          company: data.extractedInfo.company
+        }
+      });
+
       const [updatedLead] = await db
         .update(leads)
         .set({
@@ -433,6 +444,16 @@ export class DatabaseStorage implements IStorage {
         .where(eq(leads.id, lead.id))
         .returning();
 
+      console.log('Lead updated successfully with stored data:', {
+        id: updatedLead.id,
+        name: updatedLead.name,
+        email: updatedLead.email,
+        phone: updatedLead.phone,
+        company: updatedLead.company,
+        completedTopics: updatedLead.completedTopics,
+        extractedInfo: updatedLead.extractedInfo
+      });
+
       return updatedLead;
     } else {
       // Create new lead for this session
@@ -450,6 +471,18 @@ export class DatabaseStorage implements IStorage {
       if (data.topic === 'when') fiveWProgress.when = { completed: true, value: data.extractedInfo.when || '' };
       if (data.topic === 'where') fiveWProgress.where = { completed: true, value: data.extractedInfo.where || '' };
       if (data.topic === 'who') fiveWProgress.who = { completed: true, value: data.extractedInfo.who || '' };
+
+      console.log('Creating new lead with extracted info:', {
+        chatbotId: data.chatbotId,
+        sessionId: data.sessionId,
+        extractedInfo: data.extractedInfo,
+        contactInfo: {
+          name: data.extractedInfo.name,
+          email: data.extractedInfo.email,
+          phone: data.extractedInfo.phone,
+          company: data.extractedInfo.company
+        }
+      });
 
       const [newLead] = await db
         .insert(leads)
@@ -474,6 +507,16 @@ export class DatabaseStorage implements IStorage {
           isCompleted: false
         })
         .returning();
+
+      console.log('New lead created successfully with stored data:', {
+        id: newLead.id,
+        name: newLead.name,
+        email: newLead.email,
+        phone: newLead.phone,
+        company: newLead.company,
+        completedTopics: newLead.completedTopics,
+        extractedInfo: newLead.extractedInfo
+      });
 
       return newLead;
     }

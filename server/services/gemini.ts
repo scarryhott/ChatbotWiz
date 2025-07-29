@@ -322,18 +322,27 @@ async function extractTopicInformation(
   conversationHistory: any[]
 ): Promise<Record<string, any>> {
   try {
-    const extractionPrompt = `Extract relevant information from the conversation for the ${topic.toUpperCase()} topic.
+    const fullConversation = conversationHistory.map((msg: any) => `${msg.role || msg.type}: ${msg.content}`).join('\n');
+    
+    const extractionPrompt = `Extract ALL relevant information from the ENTIRE conversation for the ${topic.toUpperCase()} topic.
 
-Conversation context:
-${conversationHistory.slice(-3).map((msg: any) => `${msg.role || msg.type}: ${msg.content}`).join('\n')}
-User: ${userMessage}
-Assistant: ${aiResponse}
+FULL CONVERSATION HISTORY:
+${fullConversation}
+Current User Message: ${userMessage}
+Current AI Response: ${aiResponse}
 
-Based on this conversation, extract the following information for the ${topic} topic:
+Based on the ENTIRE conversation above, extract the following information for the ${topic} topic:
 
 ${getExtractionSchema(topic)}
 
-Return a JSON object with the extracted information. If information is not available, use null.`;
+IMPORTANT: 
+- Look through ALL conversation messages, not just the most recent ones
+- Extract ANY contact information mentioned anywhere in the conversation (name, email, phone, company)
+- Extract ANY location information mentioned anywhere (address, city, state, area)
+- Extract ANY timing information mentioned anywhere (dates, times, availability)
+- If no specific information is available for a field, use null
+
+Return a JSON object with the extracted information.`;
 
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
@@ -395,9 +404,18 @@ function getExtractionSchema(topic: string): string {
 }
 
 function getExtractionProperties(topic: string): Record<string, any> {
+  // Base properties for all topics to capture contact info
+  const baseProperties = {
+    name: { type: "string" },
+    email: { type: "string" },
+    phone: { type: "string" },
+    company: { type: "string" }
+  };
+
   switch (topic.toLowerCase()) {
     case 'why':
       return {
+        ...baseProperties,
         motivation: { type: "string" },
         pain_points: { type: "string" },
         goals: { type: "string" },
@@ -406,6 +424,7 @@ function getExtractionProperties(topic: string): Record<string, any> {
       };
     case 'what':
       return {
+        ...baseProperties,
         services_needed: { type: "string" },
         requirements: { type: "string" },
         preferences: { type: "string" },
@@ -414,32 +433,35 @@ function getExtractionProperties(topic: string): Record<string, any> {
       };
     case 'when':
       return {
+        ...baseProperties,
         timeline: { type: "string" },
         deadline: { type: "string" },
         availability: { type: "string" },
         preferred_times: { type: "string" },
+        specific_dates: { type: "string" },
+        time_preferences: { type: "string" },
         when: { type: "string" }
       };
     case 'where':
       return {
+        ...baseProperties,
         location: { type: "string" },
         service_area: { type: "string" },
         property_type: { type: "string" },
         accessibility: { type: "string" },
+        address: { type: "string" },
         where: { type: "string" }
       };
     case 'who':
       return {
-        name: { type: "string" },
+        ...baseProperties,
         title: { type: "string" },
-        company: { type: "string" },
-        email: { type: "string" },
-        phone: { type: "string" },
         decision_maker: { type: "string" },
         who: { type: "string" }
       };
     default:
       return {
+        ...baseProperties,
         [topic]: { type: "string" }
       };
   }
