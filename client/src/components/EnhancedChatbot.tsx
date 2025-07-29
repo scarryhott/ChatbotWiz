@@ -283,11 +283,14 @@ export function EnhancedChatbot({
     if (!hasLoadedFromStorage) return;
     
     const allMessages = Object.values(chatAreaMessages).flat();
+    console.log('EnhancedChatbot saving messages:', allMessages);
     
     // Always save to localStorage for persistence within the same page session
     try {
-      localStorage.setItem(storageKey, JSON.stringify(allMessages));
-      console.log('Conversation saved to localStorage');
+      if (allMessages.length > 0) {
+        localStorage.setItem(storageKey, JSON.stringify(allMessages));
+        console.log('Conversation saved to localStorage');
+      }
     } catch (error) {
       console.error('Error saving conversation:', error);
     }
