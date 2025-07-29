@@ -60,11 +60,11 @@ export default function EnhancedLeadCollection({ chatbotId }: EnhancedLeadCollec
   const filteredAndSortedLeads = leads
     .filter(lead => {
       const matchesSearch = 
-        lead.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        lead.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        lead.phone.includes(searchTerm) ||
-        lead.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        lead.service.toLowerCase().includes(searchTerm.toLowerCase());
+        (lead.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+        (lead.email?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+        (lead.phone || '').includes(searchTerm) ||
+        (lead.location?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+        (lead.service?.toLowerCase() || '').includes(searchTerm.toLowerCase());
       
       const matchesStatus = statusFilter === 'all' || lead.status === statusFilter;
       
@@ -78,7 +78,7 @@ export default function EnhancedLeadCollection({ chatbotId }: EnhancedLeadCollec
           comparison = new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
           break;
         case 'name':
-          comparison = a.name.localeCompare(b.name);
+          comparison = (a.name || '').localeCompare(b.name || '');
           break;
         case 'score':
           comparison = a.score - b.score;
