@@ -347,9 +347,20 @@ export function EnhancedChatbot({
     try {
       setIsProcessing(true);
       
-      const conversationHistory = chatAreaMessages[topic] || [];
+      // Send ALL conversation history across ALL tabs for full context analysis
+      const allConversationHistory = Object.values(chatAreaMessages).flat().sort((a, b) => 
+        new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+      );
       const chatbotId = config.id || 'demo-chatbot-1';
-      console.log('Sending chat request with chatbotId:', chatbotId, 'config.id:', config.id);
+      console.log('Sending chat request with full conversation context:', {
+        chatbotId,
+        currentTopic: topic,
+        totalMessages: allConversationHistory.length,
+        tabBreakdown: Object.keys(chatAreaMessages).map(tab => ({
+          tab,
+          messageCount: chatAreaMessages[tab]?.length || 0
+        }))
+      });
       
       const response = await fetch('/api/chat/response', {
         method: 'POST',
@@ -360,7 +371,7 @@ export function EnhancedChatbot({
           message: userMessage,
           topic: topic,
           businessInfo: businessInfo,
-          conversationHistory: conversationHistory,
+          conversationHistory: allConversationHistory, // Full context across all tabs
           chatbotId: chatbotId,
           sessionId: sessionId.current
         }),

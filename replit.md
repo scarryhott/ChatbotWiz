@@ -25,6 +25,8 @@ This is a full-stack TypeScript application for an AI-powered chatbot creation a
 ✓ **Intelligent Tab Switching** - LLM now determines which tab to switch to based on conversation context, not hardcoded logic
 ✓ **AI Tab Selection Fix** - Fixed critical bug where AI suggestions weren't being properly read by frontend for every message
 ✓ **Consistent Tab Switching** - AI now properly analyzes conversation context and suggests appropriate tabs for each interaction
+✓ **Full Context Analysis** - AI now receives complete conversation history across all tabs for intelligent tab decisions
+✓ **Contextual Tab Selection** - Replaced keyword-based switching with comprehensive conversation flow analysis
 
 ## User Preferences
 

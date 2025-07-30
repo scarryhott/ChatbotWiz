@@ -202,18 +202,24 @@ Use "GIVE BEFORE TAKE" approach - provide value, information, and assistance bef
 - WHEN: Establish timeline (discuss availability, suggest optimal timing, capture specific times with AM/PM and dates when provided)
 - WHO: Collect contact info (ONLY after building trust and providing value)
 
-INTELLIGENT TAB SWITCHING - ALWAYS REQUIRED:
-1. MANDATORY: You MUST provide "suggestedTab" in every response 
-2. Analyze user message context and suggest the most appropriate tab:
-   - Location keywords (area, address, city, where, location) → suggestedTab: "WHERE"
-   - Timing keywords (when, schedule, time, date, urgency, deadline) → suggestedTab: "WHEN" 
-   - Service keywords (what, services, solutions, offerings, help) → suggestedTab: "WHAT"
-   - Problem/motivation keywords (why, need, problem, issue, goal) → suggestedTab: "WHY"
-   - Contact keywords (who, contact, reach, call, email, info) → suggestedTab: "WHO"
-3. If current conversation naturally continues in current tab, suggest current tab
-4. Only suggest WHO after user shows clear interest and engagement
-5. Base tab selection on conversation flow, not rigid rules
-6. CRITICAL: Every response must include a suggestedTab decision
+INTELLIGENT TAB SWITCHING - CONTEXTUAL ANALYSIS:
+1. MANDATORY: You MUST provide "suggestedTab" in every response based on FULL conversation analysis
+2. Available tabs and their purposes:
+   - "WHY": Understanding motivation, problems, goals, pain points
+   - "WHAT": Discussing specific services, solutions, requirements, offerings  
+   - "WHEN": Establishing timelines, scheduling, deadlines, availability
+   - "WHERE": Determining location, service areas, property details
+   - "WHO": Collecting contact information, decision makers
+3. Analyze the COMPLETE conversation context to determine:
+   - What topic is the user naturally discussing based on their message content?
+   - What information are they providing or seeking?
+   - What would be the most logical next step in the conversation flow?
+   - Have they shown sufficient interest/engagement before moving to WHO?
+4. Consider conversation progression:
+   - Early conversation: Focus on WHY (motivation) and WHAT (services)
+   - Mid conversation: WHEN (timing) and WHERE (location) as details emerge
+   - Later conversation: WHO (contact) only after clear value demonstration
+5. CRITICAL: Base decisions on conversation meaning and user intent, not keyword matching
 
 CONVERSATION STYLE - CRITICAL:
 - Keep responses BRIEF, CONCISE, and DYNAMIC - max 2-3 sentences unless explaining complex services
@@ -228,9 +234,11 @@ CONVERSATION STYLE - CRITICAL:
 
 Current Topic: ${currentTopic} (but be flexible to move based on user responses)`;
 
-    const conversationContext = conversationHistory.slice(-6).map((msg: any) => {
+    // Use more conversation history for better context analysis
+    const conversationContext = conversationHistory.slice(-12).map((msg: any) => {
       const role = msg.type === 'user' ? 'user' : (msg.type === 'bot' ? 'assistant' : (msg.role || msg.type));
-      return `${role}: ${msg.content}`;
+      const tab = msg.topic ? `[${msg.topic}]` : '';
+      return `${role}${tab}: ${msg.content}`;
     }).join('\n');
 
     const response = await ai.models.generateContent({
@@ -252,27 +260,36 @@ Current Topic: ${currentTopic} (but be flexible to move based on user responses)
         }
       },
       contents: `
-Recent conversation:
+FULL CONVERSATION HISTORY (across all tabs):
 ${conversationContext}
 
-Current topic: ${currentTopic}
-User message: ${userMessage}
+CURRENT CONTEXT:
+- Current tab: ${currentTopic}
+- Latest user message: ${userMessage}
+- Total conversation messages: ${conversationHistory.length}
 
-ANALYZE AND RESPOND INTELLIGENTLY:
+ANALYZE FULL CONVERSATION CONTEXT AND RESPOND:
 
-1. What topic is the user naturally discussing? (location=WHERE, timing=WHEN, services=WHAT, etc.)
-2. Should you switch topics based on their response?
-3. Are you providing value/help before asking for information?
-4. Have you gathered enough info for current topic to move forward?
+Review the ENTIRE conversation history and current user message to determine:
+1. What is the user's primary focus or intent in their current message?
+2. What information are they sharing or seeking?
+3. What topic would best serve their needs right now?
+4. How can you provide the most value in your response?
+5. What tab would make the conversation flow most naturally?
+
+TAB SELECTION LOGIC:
+- WHY: User expressing problems, motivations, needs, goals, or asking why they need services
+- WHAT: User asking about services, solutions, capabilities, or discussing specific requirements
+- WHEN: User mentioning timing, schedules, deadlines, urgency, or availability discussions
+- WHERE: User discussing location, service areas, property details, or geographic considerations  
+- WHO: User ready for contact info exchange (only after clear engagement and value provided)
 
 Generate a response that:
-- Is BRIEF and DYNAMIC (1-2 sentences max unless explaining services)
-- FIRST provides valuable information, service details, or solutions
-- Shows expertise and knowledge before asking any questions
-- If user asks about services, immediately explain what you offer and how it helps
-- If user mentions a problem, immediately offer relevant solutions
-- NEVER ask "what prompted this" or "tell me more about your motivation"
-- Switch topics naturally when user indicates different focus
+- Analyzes the full conversation context, not just keywords
+- Provides valuable information and solutions first
+- Naturally guides the conversation forward
+- Selects the most contextually appropriate tab based on conversation flow
+- Demonstrates expertise before asking questions
 - For WHEN topic: Validate timing as realistic dates/times, ask for clarification if unrealistic
 - For WHERE topic: Ensure location is within service area, clarify if outside coverage
 - For WHO topic: Validate contact info format (proper email/phone format)
