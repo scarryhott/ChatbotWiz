@@ -343,7 +343,7 @@ export function EnhancedChatbot({
 
   // Remove rigid topic questioning - let AI handle conversation flow naturally
 
-  const callGeminiAPI = async (userMessage: string, topic: string): Promise<{ response: string; nextTopic?: string; isComplete?: boolean }> => {
+  const callGeminiAPI = async (userMessage: string, topic: string): Promise<{ response: string; suggestedTab?: string; nextTopic?: string; isComplete?: boolean }> => {
     try {
       setIsProcessing(true);
       
@@ -371,9 +371,11 @@ export function EnhancedChatbot({
       }
 
       const data = await response.json();
+      console.log('Raw API response:', data);
       return {
         response: data.message || `I'd be happy to help with your ${topic.toLowerCase()} questions!`,
-        nextTopic: data.suggestedTab || data.nextTopic,
+        suggestedTab: data.suggestedTab,
+        nextTopic: data.nextTopic,
         isComplete: data.isTopicComplete
       };
       
@@ -422,14 +424,26 @@ export function EnhancedChatbot({
       
       // Switch topic based on AI suggestion - prioritize suggestedTab over nextTopic
       let responseTab = activeTab;
-      const suggestedTab = aiResponse.nextTopic;
+      // The AI always provides suggestedTab - check for it first, then fallback to nextTopic
+      const suggestedTab = aiResponse.suggestedTab || aiResponse.nextTopic;
       
-      if (suggestedTab && suggestedTab !== activeTab && ['WHY', 'WHAT', 'WHEN', 'WHERE', 'WHO'].includes(suggestedTab)) {
+      console.log('AI response for tab switching:', {
+        suggestedTab: aiResponse.suggestedTab,
+        nextTopic: aiResponse.nextTopic,
+        finalChoice: suggestedTab,
+        currentTab: activeTab
+      });
+      
+      if (suggestedTab && ['WHY', 'WHAT', 'WHEN', 'WHERE', 'WHO'].includes(suggestedTab)) {
         responseTab = suggestedTab;
-        setActiveTab(suggestedTab);
-        console.log(`AI suggests switching from ${activeTab} to ${suggestedTab} based on conversation context`);
+        if (suggestedTab !== activeTab) {
+          setActiveTab(suggestedTab);
+          console.log(`AI suggests switching from ${activeTab} to ${suggestedTab} based on conversation context`);
+        } else {
+          console.log(`AI suggests staying on ${activeTab} tab`);
+        }
       } else {
-        console.log(`AI suggests staying on ${activeTab} tab`);
+        console.log(`No valid tab suggestion received, staying on ${activeTab}`);
       }
       
       // Create bot response in the correct topic tab

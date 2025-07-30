@@ -115,7 +115,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ 
         message: response.message, 
         nextTopic: response.nextTopic, 
-        suggestedTab: response.suggestedTab,
+        suggestedTab: response.suggestedTab || response.nextTopic, // Ensure suggestedTab is always present
         isTopicComplete: response.isTopicComplete 
       });
     } catch (error) {

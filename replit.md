@@ -23,6 +23,8 @@ This is a full-stack TypeScript application for an AI-powered chatbot creation a
 ✓ **AI Response Enhancement** - Made responses brief, concise, and dynamic to match user communication style
 ✓ **Data Validation System** - Added validation for timing (realistic dates), location (service area), and contact info (proper email/phone format)
 ✓ **Intelligent Tab Switching** - LLM now determines which tab to switch to based on conversation context, not hardcoded logic
+✓ **AI Tab Selection Fix** - Fixed critical bug where AI suggestions weren't being properly read by frontend for every message
+✓ **Consistent Tab Switching** - AI now properly analyzes conversation context and suggests appropriate tabs for each interaction
 
 ## User Preferences
 
